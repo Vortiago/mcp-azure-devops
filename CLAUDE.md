@@ -53,3 +53,33 @@ The information in this document is critical when working with this code base. T
   - Explicit None checks for Optional
   - Type narrowing for strings
   - Version warnings can be ignored if checks pass
+
+## Local API Reference Files
+
+The repository contains a comprehensive set of JSON files that document Azure DevOps REST API endpoints with examples. These are located in the `docs/azuredevops/` directory and organized by service area.
+
+- **File structure and naming**:
+  - Files are organized by service (git, core, work, etc.) and API version folders
+  - HTTP verb is included in the filename (e.g., `GET__git_repositories.json`, `POST__git_repositories.json`)
+  - Paths reflect the actual API endpoint structure
+
+- **File contents**:
+  - Each file contains a complete example of a REST API request and response
+  - The `x-ms-vss-request-method` property indicates the HTTP method
+  - The `x-ms-vss-request-url` property shows the complete endpoint URL
+  - The `parameters` section lists required query parameters
+  - The `responses` section contains example response bodies with status codes
+
+- **How to use these files**:
+  - Examine these files to understand the expected request/response format
+  - Use them to create models for request and response objects
+  - Reference for parameter requirements and validation
+  - Use as templates for mocking API responses in tests
+  - Follow the patterns shown in these files when implementing new endpoints
+
+- **When implementing a new endpoint**:
+  1. Find the corresponding JSON file in the docs directory
+  2. Review the request format, parameters, and URL structure
+  3. Study the response format to create appropriate Pydantic models
+  4. Implement the API wrapper following the established patterns
+  
