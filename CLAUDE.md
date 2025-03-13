@@ -4,7 +4,7 @@ The information in this document is critical when working with this code base. T
 
 ## Commands
 
-- Install dependencies: `uv install -e ".[dev]"`
+- Install dependencies: `uv pip install -e ".[dev]"`
 - Development server: `mcp dev src/mcp_azure_devops/server.py`
 - Run tests: `uv run pytest tests/`
 - Run single test: `uv run pytest tests/test_file.py::test_function`
