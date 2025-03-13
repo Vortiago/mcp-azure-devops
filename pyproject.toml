@@ -13,6 +13,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
+    "azure-devops>=7.1.0b4",
     "mcp[cli]>=0.1.0",
 ]
 
