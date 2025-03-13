@@ -56,7 +56,8 @@ The information in this document is critical when working with this code base. T
 
 ## Local API Reference Files
 
-The repository contains a comprehensive set of JSON files that document Azure DevOps REST API endpoints with examples. These are located in the `docs/azuredevops/` directory and organized by service area.
+The repository contains a comprehensive set of JSON files that document Azure DevOps REST API endpoints with examples. These are located in the `docs/azuredevops-restapi/` directory and organized by service area.
+It also contains SDK documentation for the Python SDK that is the primary method of accessing azure devops.
 
 - **File structure and naming**:
   - Files are organized by service (git, core, work, etc.) and API version folders
@@ -80,6 +81,5 @@ The repository contains a comprehensive set of JSON files that document Azure De
 - **When implementing a new endpoint**:
   1. Find the corresponding JSON file in the docs directory
   2. Review the request format, parameters, and URL structure
-  3. Study the response format to create appropriate Pydantic models
-  4. Implement the API wrapper following the established patterns
+  3. Use the Azure DevOps Python SDK for interacting with Azure DevOps.
   
