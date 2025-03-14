@@ -38,6 +38,7 @@ python_functions = "test_*"
 line-length = 79
 target-version = "py310"
 select = ["E", "F", "I"]
+extend-exclude = ["docs"]
 
 [dependency-groups]
 dev = [
