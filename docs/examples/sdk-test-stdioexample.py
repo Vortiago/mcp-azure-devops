@@ -1,7 +1,6 @@
 import shutil
 
 import pytest
-
 from mcp.client.stdio import StdioServerParameters, stdio_client
 from mcp.types import JSONRPCMessage, JSONRPCRequest, JSONRPCResponse
 

@@ -4,10 +4,9 @@ WIT samples
 import datetime
 import logging
 
+from azure.devops.v5_1.work_item_tracking.models import Wiql
 from samples import resource
 from utils import emit
-
-from azure.devops.v5_1.work_item_tracking.models import Wiql
 
 logger = logging.getLogger(__name__)
 

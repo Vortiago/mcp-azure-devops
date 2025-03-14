@@ -2,11 +2,9 @@
 Tests for the Azure DevOps MCP Server.
 """
 import pytest
-
 from mcp.shared.memory import (
     create_connected_server_and_client_session as client_session,
 )
-from mcp.types import TextContent
 
 from mcp_azure_devops.server import mcp
 

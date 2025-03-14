@@ -1,7 +1,6 @@
 """Tests for example servers"""
 
 import pytest
-
 from mcp.shared.memory import (
     create_connected_server_and_client_session as client_session,
 )
@@ -45,9 +44,8 @@ async def test_desktop(monkeypatch):
     """Test the desktop server"""
     from pathlib import Path
 
-    from pydantic import AnyUrl
-
     from examples.fastmcp.desktop import mcp
+    from pydantic import AnyUrl
 
     # Mock desktop directory listing
     mock_files = [Path("/fake/path/file1.txt"), Path("/fake/path/file2.txt")]
