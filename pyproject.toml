@@ -40,6 +40,14 @@ target-version = "py310"
 select = ["E", "F", "I"]
 extend-exclude = ["docs"]
 
+[tool.pyright]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    "docs/"
+]
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.396",
