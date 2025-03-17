@@ -7,7 +7,7 @@ name = "mcp-azure-devops"
 description = "A Model Context Protocol (MCP) server for Azure DevOps"
 version = "0.1.0"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    {name = "Atle H. Havsø", email = "atle@havso.net"},
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -16,6 +16,9 @@ dependencies = [
     "azure-devops>=7.1.0b4",
     "mcp[cli]>=0.1.0",
 ]
+
+[project.scripts]
+mcp-azure-devops = "mcp_azure_devops.server:main"
 
 [project.optional-dependencies]
 dev = [
