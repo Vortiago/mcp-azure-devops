@@ -21,7 +21,7 @@ def format_work_items(work_items: List[WorkItem]) -> str:
     """
     formatted_results = []
     for work_item in work_items:
-        if work_item and work_item.fields:
+        if work_item and work_item.fields is not None:
             item_type = work_item.fields.get("System.WorkItemType", "Unknown")
             item_id = work_item.id
             item_title = work_item.fields.get("System.Title", "Untitled")
