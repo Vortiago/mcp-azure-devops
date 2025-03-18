@@ -83,3 +83,18 @@ It also contains SDK documentation for the Python SDK that is the primary method
   2. Review the request format, parameters, and URL structure
   3. Use the Azure DevOps Python SDK for interacting with Azure DevOps.
   
+## Understanding Azure DevOps Resources
+
+In the context of this project, "Azure DevOps resources" refers to two things:
+
+1. **Azure DevOps Entities**: The various objects and data structures within Azure DevOps that this server interacts with:
+   - Work items (bugs, tasks, user stories, epics)
+   - Repositories and branches
+   - Pull requests and code reviews
+   - Build and release pipelines
+   - Project and team configurations
+   - Test plans and test results
+   - Dashboards and reports
+
+2. **MCP Resources**: In the Model Context Protocol, resources are data providers (similar to GET endpoints in a REST API). The `resources/` module in this project implements MCP resources that fetch data from Azure DevOps and make it available to AI assistants in their context window.
+  

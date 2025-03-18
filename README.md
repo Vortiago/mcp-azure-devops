@@ -13,57 +13,6 @@ This project implements a Model Context Protocol (MCP) server that allows AI ass
 - **Pull Request Handling**: Create, update, and review Pull Requests
 - **Sprint Management**: Plan and manage sprints and iterations
 - **Branch Policy Administration**: Configure and manage branch policies
-- **Team Management**: Work with teams and project structures
-
-## How It Works
-
-This MCP server is built using:
-
-1. **MCP Python SDK**: Provides the framework for creating a Model Context Protocol server
-2. **Azure DevOps Python API**: Handles all interactions with Azure DevOps services
-
-The server exposes Azure DevOps functionality through:
-
-- **Resources**: Provide data like work item details, PR information, pipeline status
-- **Tools**: Allow execution of actions like creating work items or triggering pipelines
-- **Prompts**: Guide interactions with specific Azure DevOps workflows
-
-## Project Structure
-
-The project follows a modern Python package structure with a `src` layout:
-
-```
-mcp-azure-devops/
-├── src/
-│   └── mcp_azure_devops/
-│       ├── __init__.py
-│       ├── server.py
-│       ├── resources/
-│       │   ├── __init__.py
-│       │   ├── work_items.py
-│       │   ├── pipelines.py
-│       │   └── pull_requests.py
-│       ├── tools/
-│       │   ├── __init__.py
-│       │   ├── work_item_tools.py
-│       │   ├── pipeline_tools.py
-│       │   └── pr_tools.py
-│       ├── models/
-│       │   ├── __init__.py
-│       │   └── azure_devops.py
-│       └── utils/
-│           ├── __init__.py
-│           └── api_helpers.py
-├── tests/
-│   ├── __init__.py
-│   ├── test_work_items.py
-│   └── test_pipelines.py
-├── docs/
-├── README.md
-├── pyproject.toml
-├── requirements.txt
-└── .gitignore
-```
 
 ## Getting Started
 
@@ -82,6 +31,9 @@ cd mcp-azure-devops
 
 # Install in development mode
 pip install -e ".[dev]"
+
+# Install from PyPi
+pip install mcp_azure_devops
 ```
 
 ### Configuration
@@ -122,21 +74,6 @@ Create a pull request from feature/new-login-page to main with the title "Implem
 ```
 What's the status of the latest build for the main branch?
 ```
-
-## Understanding Azure DevOps Resources
-
-In the context of this project, "Azure DevOps resources" refers to two things:
-
-1. **Azure DevOps Entities**: The various objects and data structures within Azure DevOps that this server interacts with:
-   - Work items (bugs, tasks, user stories, epics)
-   - Repositories and branches
-   - Pull requests and code reviews
-   - Build and release pipelines
-   - Project and team configurations
-   - Test plans and test results
-   - Dashboards and reports
-
-2. **MCP Resources**: In the Model Context Protocol, resources are data providers (similar to GET endpoints in a REST API). The `resources/` module in this project implements MCP resources that fetch data from Azure DevOps and make it available to AI assistants in their context window.
 
 ## Contributing
 
