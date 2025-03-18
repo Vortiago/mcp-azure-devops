@@ -3,11 +3,9 @@ Work item tools for Azure DevOps.
 
 This module provides MCP tools for working with Azure DevOps work items.
 """
-import os
 from typing import Optional
-from azure.devops.connection import Connection
 from azure.devops.v7_1.work_item_tracking.models import Wiql
-from msrest.authentication import BasicAuthentication
+from mcp_azure_devops.utils.azure_client import get_connection
 
 
 def register_tools(mcp):
@@ -30,16 +28,11 @@ def register_tools(mcp):
         Returns:
             Formatted string containing work item details
         """
-        # Get credentials from environment variables
-        pat = os.environ.get("AZURE_DEVOPS_PAT")
-        organization_url = os.environ.get("AZURE_DEVOPS_ORGANIZATION_URL")
+        # Get connection to Azure DevOps
+        connection = get_connection()
         
-        if not pat or not organization_url:
+        if not connection:
             return "Error: Azure DevOps PAT or organization URL not found in environment variables."
-        
-        # Create a connection to Azure DevOps
-        credentials = BasicAuthentication('', pat)
-        connection = Connection(base_url=organization_url, creds=credentials)
         
         # Get the work item tracking client
         wit_client = connection.clients.get_work_item_tracking_client()
