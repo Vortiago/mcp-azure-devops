@@ -76,4 +76,5 @@ Write-Host "All downloads completed." -ForegroundColor Green
 
 Write-Host "Running Repomix on external repositories"
 
-repomix --remote https://github.com/microsoft/azure-devops-python-api/ --compress -o docs/external/repomix-summary-devopssdk.xml --include azure-devops/azure/devops/v7_1/**
+repomix --remote https://github.com/microsoft/azure-devops-python-api/ --compress -o docs/external/azdo-sdk/repomix-summary-devopssdk.xml --include "azure-devops/azure/devops/v7_1/**"
+repomix --remote https://github.com/modelcontextprotocol/servers --compress -o "docs/external/mcp-sdk/repomix-summary-mcpserverexamples.xml" --include "src/sentry/**,src/fetch/**" --ignore "**/*.lock,**/Dockerfile,**/LICENSE"
