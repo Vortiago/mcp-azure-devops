@@ -7,6 +7,7 @@ from typing import Optional, List
 from azure.devops.v7_1.work_item_tracking.models import Wiql, WorkItem
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
 from mcp_azure_devops.utils.azure_client import get_connection
+from mcp_azure_devops.features.work_items.common import get_work_item_client, AzureDevOpsClientError
 
 
 def format_work_items(work_items: List[WorkItem]) -> str:
@@ -90,17 +91,9 @@ def register_tools(mcp) -> None:
         Returns:
             Formatted string containing work item details
         """
-        # Get connection to Azure DevOps
-        connection = get_connection()
-        
-        if not connection:
-            return "Error: Azure DevOps PAT or organization URL not found in environment variables."
-        
-        # Get the work item tracking client
-        wit_client = connection.clients.get_work_item_tracking_client()
-        
-        if wit_client is None:
-            return "Error: Failed to get work item tracking client."
-            
-        # Ensure top is not None before passing to implementation
-        return _query_work_items_impl(query, top or 30, wit_client)
+        try:
+            wit_client = get_work_item_client()
+            # Ensure top is not None before passing to implementation
+            return _query_work_items_impl(query, top or 30, wit_client)
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
