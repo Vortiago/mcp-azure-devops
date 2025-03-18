@@ -14,14 +14,19 @@ readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
     "azure-devops>=7.1.0b4",
-    "mcp[cli]>=0.1.0",
+    "mcp>=0.1.0",
 ]
+
+[project.urls]
+"Homepage" = "https://github.com/Vortiago/mcp-azure-devops"
+"Bug Tracker" = "https://github.com/Vortiago/mcp-azure-devops/issues"
 
 [project.scripts]
 mcp-azure-devops = "mcp_azure_devops.server:main"
 
 [project.optional-dependencies]
 dev = [
+    "mcp[cli]>=0.1.0",
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "ruff>=0.0.267",
@@ -51,10 +56,3 @@ exclude = [
     "docs/"
 ]
 
-[dependency-groups]
-dev = [
-    "pyright>=1.1.396",
-    "pytest>=8.3.5",
-    "ruff>=0.10.0",
-    "trio>=0.29.0",
-]
