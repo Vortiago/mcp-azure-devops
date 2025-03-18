@@ -8,7 +8,11 @@ This project implements a Model Context Protocol (MCP) server that allows AI ass
 
 ## Features
 
-- **Work Item Management**: Create, update, and query work items
+Currently implemented:
+- **Work Item Management**: Query work items using WIQL
+
+Planned features:
+- **Work Item Management**: Create and update work items
 - **Pipeline Operations**: Query pipeline status and trigger new pipeline runs
 - **Pull Request Handling**: Create, update, and review Pull Requests
 - **Sprint Management**: Plan and manage sprints and iterations
@@ -42,8 +46,10 @@ Create a `.env` file in the project root with the following variables:
 
 ```
 AZURE_DEVOPS_PAT=your_personal_access_token
-AZURE_DEVOPS_ORGANIZATION=your_organization_name
+AZURE_DEVOPS_ORGANIZATION_URL=https://your-organization.visualstudio.com or https://dev.azure.com/your-organisation
 ```
+
+Note: Make sure to provide the full URL to your Azure DevOps organization.
 
 ### Running the Server
 
@@ -63,13 +69,13 @@ mcp install src/mcp_azure_devops/server.py --name "Azure DevOps Assistant"
 Show me all active bugs assigned to me in the current sprint
 ```
 
-### Create a Pull Request
+### Create a Pull Request (Coming Soon)
 
 ```
 Create a pull request from feature/new-login-page to main with the title "Implement new login page"
 ```
 
-### Check Pipeline Status
+### Check Pipeline Status (Coming Soon)
 
 ```
 What's the status of the latest build for the main branch?
