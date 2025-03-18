@@ -17,12 +17,12 @@ dependencies = [
     "mcp>=0.1.0",
 ]
 
+[project.scripts]
+mcp-azure-devops = "mcp_azure_devops.server:main"
+
 [project.urls]
 "Homepage" = "https://github.com/Vortiago/mcp-azure-devops"
 "Bug Tracker" = "https://github.com/Vortiago/mcp-azure-devops/issues"
-
-[project.scripts]
-mcp-azure-devops = "mcp_azure_devops.server:main"
 
 [project.optional-dependencies]
 dev = [
