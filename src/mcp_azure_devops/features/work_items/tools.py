@@ -25,7 +25,12 @@ def _format_work_item_basic(work_item: WorkItem) -> str:
     item_type = fields.get("System.WorkItemType", "Unknown")
     state = fields.get("System.State", "Unknown")
     
-    return f"# Work Item {work_item.id}: {title}\nType: {item_type}\nState: {state}"
+    # Add link to the work item (if available)
+    url_part = ""
+    if hasattr(work_item, "url") and work_item.url:
+        url_part = f"\nUrl: {work_item.url}"
+    
+    return f"# Work Item {work_item.id}: {title}\nType: {item_type}\nState: {state}{url_part}"
 
 
 def _format_work_item_detailed(work_item: WorkItem, basic_info: str) -> str:
@@ -51,7 +56,19 @@ def _format_work_item_detailed(work_item: WorkItem, basic_info: str) -> str:
     details.append("\n## Additional Details")
     
     if "System.AssignedTo" in fields:
-        details.append(f"Assigned To: {fields['System.AssignedTo']}")
+        assigned_to = fields['System.AssignedTo']
+        # Handle the AssignedTo object which could be a dict or dictionary-like object
+        if hasattr(assigned_to, 'display_name') and hasattr(assigned_to, 'unique_name'):
+            # If it's an object with directly accessible properties
+            details.append(f"Assigned To: {assigned_to.display_name} ({assigned_to.unique_name})")
+        elif isinstance(assigned_to, dict):
+            # If it's a dictionary
+            display_name = assigned_to.get('displayName', '')
+            unique_name = assigned_to.get('uniqueName', '')
+            details.append(f"Assigned To: {display_name} ({unique_name})")
+        else:
+            # Fallback to display the raw value if we can't parse it
+            details.append(f"Assigned To: {assigned_to}")
     
     if "System.IterationPath" in fields:
         details.append(f"Iteration: {fields['System.IterationPath']}")
@@ -96,29 +113,6 @@ def _get_work_item_impl(
         return f"Error retrieving work item {item_id}: {str(e)}"
 
 
-def format_work_items(work_items: List[WorkItem]) -> str:
-    """
-    Format work items into readable strings.
-    
-    Args:
-        work_items: List of work item objects to format
-        
-    Returns:
-        Formatted string of work items
-    """
-    formatted_results = []
-    for work_item in work_items:
-        if work_item and work_item.fields is not None:
-            item_type = work_item.fields.get("System.WorkItemType", "Unknown")
-            item_id = work_item.id
-            item_title = work_item.fields.get("System.Title", "Untitled")
-            item_state = work_item.fields.get("System.State", "Unknown")
-            
-            formatted_results.append(
-                f"{item_type} {item_id}: {item_title} ({item_state})"
-            )
-    
-    return "\n".join(formatted_results)
 
 
 def _query_work_items_impl(
@@ -151,7 +145,13 @@ def _query_work_items_impl(
     work_item_ids = [int(res.id) for res in wiql_results]
     work_items = wit_client.get_work_items(ids=work_item_ids, error_policy="omit")
     
-    return format_work_items(work_items)
+    # Use the same formatting as get_work_item_basic
+    formatted_results = []
+    for work_item in work_items:
+        if work_item:
+            formatted_results.append(_format_work_item_basic(work_item))
+    
+    return "\n\n".join(formatted_results)
 
 
 def register_tools(mcp) -> None:
