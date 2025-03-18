@@ -1,5 +1,5 @@
 # Work items feature package for Azure DevOps MCP
-from mcp_azure_devops.features.work_items import resources, tools
+from mcp_azure_devops.features.work_items import tools
 
 def register(mcp):
     """
@@ -8,5 +8,4 @@ def register(mcp):
     Args:
         mcp: The FastMCP server instance
     """
-    resources.register_resources(mcp)
     tools.register_tools(mcp)
