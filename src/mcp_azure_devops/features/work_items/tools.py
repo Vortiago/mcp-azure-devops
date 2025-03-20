@@ -24,13 +24,20 @@ def _format_work_item_basic(work_item: WorkItem) -> str:
     title = fields.get("System.Title", "Untitled")
     item_type = fields.get("System.WorkItemType", "Unknown")
     state = fields.get("System.State", "Unknown")
+    project = fields.get("System.TeamProject", "Unknown")
     
     # Add link to the work item (if available)
     url_part = ""
-    if hasattr(work_item, "url") and work_item.url:
-        url_part = f"\nUrl: {work_item.url}"
+    # Safely handle the _links attribute which is a ReferenceLinks object, not a dictionary
+    try:
+        if hasattr(work_item, '_links') and work_item._links:
+            if hasattr(work_item._links, 'self') and hasattr(work_item._links.html, 'href'):
+                url_part = f"\nWeb URL: {work_item._links.html.href}"
+    except Exception:
+        # If any error occurs, just skip adding the URL
+        pass
     
-    return f"# Work Item {work_item.id}: {title}\nType: {item_type}\nState: {state}{url_part}"
+    return f"# Work Item {work_item.id}: {title}\nType: {item_type}\nState: {state}\nProject: {project}{url_part}"
 
 
 def _format_work_item_detailed(work_item: WorkItem, basic_info: str) -> str:
@@ -153,7 +160,8 @@ def _get_work_item_impl(
 
 def _get_work_item_comments_impl(
     item_id: int,
-    wit_client: WorkItemTrackingClient
+    wit_client: WorkItemTrackingClient,
+    project: Optional[str] = None
 ) -> str:
     """
     Implementation of work item comments retrieval.
@@ -161,42 +169,48 @@ def _get_work_item_comments_impl(
     Args:
         item_id: The work item ID
         wit_client: Work item tracking client
+        project: Optional project name
             
     Returns:
         Formatted string containing work item comments
     """
-    try:
-        # Get the comments for the work item
-        comments = wit_client.get_comments(project=None, work_item_id=item_id)
+    # If project is not provided, try to get it from the work item
+    if not project:
+        try:
+            work_item = wit_client.get_work_item(item_id)
+            if work_item and work_item.fields:
+                project = work_item.fields.get("System.TeamProject")
+        except Exception as e:
+            return f"Error retrieving work item {item_id} to determine project: {str(e)}"
+    
+    # Get comments using the project if available
+    comments = wit_client.get_comments(project=project, work_item_id=item_id)
+    
+    # Format the comments
+    formatted_comments = []
+    for comment in comments.comments:
+        # Format the date if available
+        created_date = ""
+        if hasattr(comment, 'created_date') and comment.created_date:
+            created_date = f" on {comment.created_date}"
         
-        if not comments or not hasattr(comments, 'comments') or not comments.comments:
-            return f"No comments found for work item {item_id}."
+        # Format the author if available
+        author = "Unknown"
+        if hasattr(comment, 'created_by') and comment.created_by:
+            if hasattr(comment.created_by, 'display_name') and comment.created_by.display_name:
+                author = comment.created_by.display_name
         
-        # Format the comments
-        formatted_comments = []
-        for comment in comments.comments:
-            # Format the date if available
-            created_date = ""
-            if hasattr(comment, 'created_date') and comment.created_date:
-                created_date = f" on {comment.created_date}"
-            
-            # Format the author if available
-            author = "Unknown"
-            if hasattr(comment, 'created_by') and comment.created_by:
-                if hasattr(comment.created_by, 'display_name') and comment.created_by.display_name:
-                    author = comment.created_by.display_name
-            
-            # Format the comment text
-            text = "No text"
-            if hasattr(comment, 'text') and comment.text:
-                text = comment.text
-            
-            formatted_comments.append(f"## Comment by {author}{created_date}:\n{text}")
+        # Format the comment text
+        text = "No text"
+        if hasattr(comment, 'text') and comment.text:
+            text = comment.text
         
-        return "\n\n".join(formatted_comments)
-            
-    except Exception as e:
-        return f"Error retrieving comments for work item {item_id}: {str(e)}"
+        formatted_comments.append(f"## Comment by {author}{created_date}:\n{text}")
+    
+    if not formatted_comments:
+        return "No comments found for this work item."
+    
+    return "\n\n".join(formatted_comments)
 
 
 def _query_work_items_impl(
@@ -308,19 +322,21 @@ def register_tools(mcp) -> None:
     
     @mcp.tool()
     def get_work_item_comments(
-        id: int
+        id: int,
+        project: Optional[str] = None
     ) -> str:
         """
         Get all comments for a work item.
-        
+    
         Args:
             id: The work item ID
+            project: Optional project name. If not provided, will be determined from the work item.
             
         Returns:
             Formatted string containing all comments on the work item
         """
         try:
             wit_client = get_work_item_client()
-            return _get_work_item_comments_impl(id, wit_client)
+            return _get_work_item_comments_impl(id, wit_client, project)
         except AzureDevOpsClientError as e:
             return f"Error: {str(e)}"

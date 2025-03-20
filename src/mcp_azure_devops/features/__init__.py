@@ -1,5 +1,6 @@
 # Azure DevOps MCP features package
 from mcp_azure_devops.features import work_items
+from mcp_azure_devops.features import projects
 
 def register_all(mcp):
     """
@@ -9,4 +10,4 @@ def register_all(mcp):
         mcp: The FastMCP server instance
     """
     work_items.register(mcp)
-    # Add future feature registrations here
+    projects.register(mcp)
