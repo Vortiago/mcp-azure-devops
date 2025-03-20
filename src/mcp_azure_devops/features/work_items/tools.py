@@ -52,6 +52,16 @@ def _format_work_item_detailed(work_item: WorkItem, basic_info: str) -> str:
         details.append("\n## Description")
         details.append(fields["System.Description"])
     
+    # Add acceptance criteria if available
+    if "Microsoft.VSTS.Common.AcceptanceCriteria" in fields:
+        details.append("\n## Acceptance Criteria")
+        details.append(fields["Microsoft.VSTS.Common.AcceptanceCriteria"])
+    
+    # Add repro steps if available
+    if "Microsoft.VSTS.TCM.ReproSteps" in fields:
+        details.append("\n## Repro Steps")
+        details.append(fields["Microsoft.VSTS.TCM.ReproSteps"])
+    
     # Add additional details section
     details.append("\n## Additional Details")
     
@@ -70,13 +80,39 @@ def _format_work_item_detailed(work_item: WorkItem, basic_info: str) -> str:
             # Fallback to display the raw value if we can't parse it
             details.append(f"Assigned To: {assigned_to}")
     
+    # Add created by information
+    if "System.CreatedBy" in fields:
+        created_by = fields['System.CreatedBy']
+        if hasattr(created_by, 'display_name'):
+            details.append(f"Created By: {created_by.display_name}")
+        elif isinstance(created_by, dict) and 'displayName' in created_by:
+            details.append(f"Created By: {created_by['displayName']}")
+        else:
+            details.append(f"Created By: {created_by}")
+    
+    # Add created date
+    if "System.CreatedDate" in fields:
+        details.append(f"Created Date: {fields['System.CreatedDate']}")
+    
     if "System.IterationPath" in fields:
         details.append(f"Iteration: {fields['System.IterationPath']}")
     
     if "System.AreaPath" in fields:
         details.append(f"Area: {fields['System.AreaPath']}")
     
-    # Add more fields as needed
+    # Add tags
+    if "System.Tags" in fields and fields["System.Tags"]:
+        details.append(f"Tags: {fields['System.Tags']}")
+    
+    # Add priority
+    if "Microsoft.VSTS.Common.Priority" in fields:
+        details.append(f"Priority: {fields['Microsoft.VSTS.Common.Priority']}")
+    
+    # Add effort/story points (could be in different fields depending on process template)
+    if "Microsoft.VSTS.Scheduling.Effort" in fields:
+        details.append(f"Effort: {fields['Microsoft.VSTS.Scheduling.Effort']}")
+    if "Microsoft.VSTS.Scheduling.StoryPoints" in fields:
+        details.append(f"Story Points: {fields['Microsoft.VSTS.Scheduling.StoryPoints']}")
     
     return "\n".join(details)
 
@@ -113,6 +149,54 @@ def _get_work_item_impl(
         return f"Error retrieving work item {item_id}: {str(e)}"
 
 
+
+
+def _get_work_item_comments_impl(
+    item_id: int,
+    wit_client: WorkItemTrackingClient
+) -> str:
+    """
+    Implementation of work item comments retrieval.
+    
+    Args:
+        item_id: The work item ID
+        wit_client: Work item tracking client
+            
+    Returns:
+        Formatted string containing work item comments
+    """
+    try:
+        # Get the comments for the work item
+        comments = wit_client.get_comments(project=None, work_item_id=item_id)
+        
+        if not comments or not hasattr(comments, 'comments') or not comments.comments:
+            return f"No comments found for work item {item_id}."
+        
+        # Format the comments
+        formatted_comments = []
+        for comment in comments.comments:
+            # Format the date if available
+            created_date = ""
+            if hasattr(comment, 'created_date') and comment.created_date:
+                created_date = f" on {comment.created_date}"
+            
+            # Format the author if available
+            author = "Unknown"
+            if hasattr(comment, 'created_by') and comment.created_by:
+                if hasattr(comment.created_by, 'display_name') and comment.created_by.display_name:
+                    author = comment.created_by.display_name
+            
+            # Format the comment text
+            text = "No text"
+            if hasattr(comment, 'text') and comment.text:
+                text = comment.text
+            
+            formatted_comments.append(f"## Comment by {author}{created_date}:\n{text}")
+        
+        return "\n\n".join(formatted_comments)
+            
+    except Exception as e:
+        return f"Error retrieving comments for work item {item_id}: {str(e)}"
 
 
 def _query_work_items_impl(
@@ -219,5 +303,24 @@ def register_tools(mcp) -> None:
         try:
             wit_client = get_work_item_client()
             return _get_work_item_impl(id, wit_client, detailed=True)
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+    
+    @mcp.tool()
+    def get_work_item_comments(
+        id: int
+    ) -> str:
+        """
+        Get all comments for a work item.
+        
+        Args:
+            id: The work item ID
+            
+        Returns:
+            Formatted string containing all comments on the work item
+        """
+        try:
+            wit_client = get_work_item_client()
+            return _get_work_item_comments_impl(id, wit_client)
         except AzureDevOpsClientError as e:
             return f"Error: {str(e)}"
