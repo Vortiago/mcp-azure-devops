@@ -141,7 +141,7 @@ def _get_work_item_impl(
         Formatted string containing work item information
     """
     try:
-        work_item = wit_client.get_work_item(item_id)
+        work_item = wit_client.get_work_item(item_id, expand="all")
         
         # Always format basic info first
         basic_info = _format_work_item_basic(work_item)
