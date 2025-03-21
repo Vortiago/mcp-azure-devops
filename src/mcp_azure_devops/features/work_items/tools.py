@@ -101,6 +101,22 @@ def _format_work_item_detailed(work_item: WorkItem, basic_info: str) -> str:
     if "System.CreatedDate" in fields:
         details.append(f"Created Date: {fields['System.CreatedDate']}")
     
+    # Add last updated information
+    if "System.ChangedDate" in fields:
+        changed_date = fields['System.ChangedDate']
+        
+        # Add the changed by information if available
+        if "System.ChangedBy" in fields:
+            changed_by = fields['System.ChangedBy']
+            if hasattr(changed_by, 'display_name'):
+                details.append(f"Last updated {changed_date} by {changed_by.display_name}")
+            elif isinstance(changed_by, dict) and 'displayName' in changed_by:
+                details.append(f"Last updated {changed_date} by {changed_by['displayName']}")
+            else:
+                details.append(f"Last updated {changed_date} by {changed_by}")
+        else:
+            details.append(f"Last updated: {changed_date}")
+    
     if "System.IterationPath" in fields:
         details.append(f"Iteration: {fields['System.IterationPath']}")
     
@@ -120,6 +136,37 @@ def _format_work_item_detailed(work_item: WorkItem, basic_info: str) -> str:
         details.append(f"Effort: {fields['Microsoft.VSTS.Scheduling.Effort']}")
     if "Microsoft.VSTS.Scheduling.StoryPoints" in fields:
         details.append(f"Story Points: {fields['Microsoft.VSTS.Scheduling.StoryPoints']}")
+    
+    # Add related items section if available
+    if hasattr(work_item, 'relations') and work_item.relations:
+        details.append("\n## Related Items")
+        
+        for relation in work_item.relations:
+            # Get the relation type (use getattr to safely handle missing attributes)
+            rel_type = getattr(relation, 'rel', "Unknown relation")
+            
+            # Get the target URL
+            target_url = getattr(relation, 'url', "Unknown URL")
+            
+            # Format the link based on what type it is
+            link_text = target_url
+            if "workitem" in target_url.lower():
+                # It's a work item link - try to extract the ID
+                try:
+                    work_item_id = target_url.split('/')[-1]
+                    if work_item_id.isdigit():
+                        link_text = f"Work Item #{work_item_id}"
+                except:
+                    pass  # Keep the original URL if parsing fails
+            
+            # Check for comments in attributes
+            comment = ""
+            if hasattr(relation, 'attributes') and relation.attributes:
+                attrs = relation.attributes
+                if isinstance(attrs, dict) and 'comment' in attrs and attrs['comment']:
+                    comment = f" - Comment: {attrs['comment']}"
+            
+            details.append(f"- {rel_type}: {link_text}{comment}")
     
     return "\n".join(details)
 
