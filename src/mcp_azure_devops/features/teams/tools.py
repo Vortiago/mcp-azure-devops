@@ -110,6 +110,45 @@ def _format_team_area_path(team_field_values) -> str:
     return "\n".join(formatted_info)
 
 
+def _format_team_iteration(iteration) -> str:
+    """
+    Format team iteration information.
+    
+    Args:
+        iteration: Team iteration object to format
+        
+    Returns:
+        String with team iteration details
+    """
+    formatted_info = [f"# Iteration: {iteration.name}"]
+    
+    # Add ID
+    if hasattr(iteration, "id") and iteration.id:
+        formatted_info.append(f"ID: {iteration.id}")
+    
+    # Add path
+    if hasattr(iteration, "path") and iteration.path:
+        formatted_info.append(f"Path: {iteration.path}")
+    
+    # Add attributes if available
+    if hasattr(iteration, "attributes") and iteration.attributes:
+        attributes = iteration.attributes
+        
+        # Add start date
+        if hasattr(attributes, "start_date") and attributes.start_date:
+            formatted_info.append(f"Start Date: {attributes.start_date}")
+        
+        # Add finish date
+        if hasattr(attributes, "finish_date") and attributes.finish_date:
+            formatted_info.append(f"Finish Date: {attributes.finish_date}")
+        
+        # Add time frame
+        if hasattr(attributes, "time_frame") and attributes.time_frame:
+            formatted_info.append(f"Time Frame: {attributes.time_frame}")
+    
+    return "\n".join(formatted_info)
+
+
 def _get_all_teams_impl(
     core_client: CoreClient,
     user_is_member_of: Optional[bool] = None,
@@ -227,6 +266,53 @@ def _get_team_area_paths_impl(
         return f"Error retrieving team area paths: {str(e)}"
 
 
+def _get_team_iterations_impl(
+    work_client,
+    project_name_or_id: str,
+    team_name_or_id: str,
+    current: Optional[bool] = None
+) -> str:
+    """
+    Implementation of team iterations retrieval.
+    
+    Args:
+        work_client: Work client
+        project_name_or_id: The name or ID of the team project
+        team_name_or_id: The name or ID of the team
+        current: If True, return only the current iteration
+            
+    Returns:
+        Formatted string containing team iteration information
+    """
+    try:
+        # Create a TeamContext object
+        team_context = TeamContext(
+            project=project_name_or_id,
+            team=team_name_or_id
+        )
+        
+        # Set timeframe parameter if current is True
+        timeframe = "Current" if current else None
+        
+        # Get the team iterations
+        team_iterations = work_client.get_team_iterations(
+            team_context=team_context,
+            timeframe=timeframe
+        )
+        
+        if not team_iterations:
+            return f"No iterations found for team {team_name_or_id} in project {project_name_or_id}."
+        
+        formatted_iterations = []
+        for iteration in team_iterations:
+            formatted_iterations.append(_format_team_iteration(iteration))
+        
+        return "\n\n".join(formatted_iterations)
+            
+    except Exception as e:
+        return f"Error retrieving team iterations: {str(e)}"
+
+
 def register_tools(mcp) -> None:
     """
     Register team tools with the MCP server.
@@ -316,6 +402,34 @@ def register_tools(mcp) -> None:
                 work_client,
                 project_name_or_id,
                 team_name_or_id
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+    
+    @mcp.tool()
+    def get_team_iterations(
+        project_name_or_id: str,
+        team_name_or_id: str,
+        current: Optional[bool] = None
+    ) -> str:
+        """
+        Get the iterations assigned to a team.
+        
+        Args:
+            project_name_or_id: The name or ID of the team project
+            team_name_or_id: The name or ID of the team
+            current: If True, return only the current iteration
+                
+        Returns:
+            Formatted string containing team iteration information
+        """
+        try:
+            work_client = get_work_client()
+            return _get_team_iterations_impl(
+                work_client,
+                project_name_or_id,
+                team_name_or_id,
+                current
             )
         except AzureDevOpsClientError as e:
             return f"Error: {str(e)}"
