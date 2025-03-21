@@ -6,7 +6,8 @@ This module provides MCP tools for working with Azure DevOps teams.
 from typing import Optional
 from azure.devops.v7_1.core.models import WebApiTeam
 from azure.devops.v7_1.core import CoreClient
-from mcp_azure_devops.features.teams.common import get_core_client, AzureDevOpsClientError
+from azure.devops.v7_1.work.models import TeamContext
+from mcp_azure_devops.features.teams.common import get_core_client, get_work_client, AzureDevOpsClientError
 
 
 def _format_team(team: WebApiTeam) -> str:
@@ -34,6 +35,77 @@ def _format_team(team: WebApiTeam) -> str:
     if hasattr(team, "project_id") and team.project_id:
         formatted_info.append(f"Project ID: {team.project_id}")
     
+    
+    return "\n".join(formatted_info)
+
+
+def _format_team_member(team_member) -> str:
+    """
+    Format team member information.
+    
+    Args:
+        team_member: Team member object to format
+        
+    Returns:
+        String with team member details
+    """
+    formatted_info = []
+    
+    # Get identity information
+    if hasattr(team_member, "identity") and team_member.identity:
+        identity = team_member.identity
+        # Use display name if available, otherwise use ID
+        if hasattr(identity, "display_name") and identity.display_name:
+            formatted_info.append(f"# Member: {identity.display_name}")
+        else:
+            formatted_info.append(f"# Member ID: {identity.id}")
+            
+        # Add ID
+        if hasattr(identity, "id") and identity.id:
+            formatted_info.append(f"ID: {identity.id}")
+            
+        # Add descriptor
+        if hasattr(identity, "descriptor") and identity.descriptor:
+            formatted_info.append(f"Descriptor: {identity.descriptor}")
+            
+        # Add unique name (email/username)
+        if hasattr(identity, "unique_name") and identity.unique_name:
+            formatted_info.append(f"Email/Username: {identity.unique_name}")
+    else:
+        formatted_info.append("# Unknown Member")
+    
+    # Add team admin status
+    if hasattr(team_member, "is_team_admin"):
+        is_admin = "Yes" if team_member.is_team_admin else "No"
+        formatted_info.append(f"Team Administrator: {is_admin}")
+    
+    return "\n".join(formatted_info)
+
+
+def _format_team_area_path(team_field_values) -> str:
+    """
+    Format team area path information.
+    
+    Args:
+        team_field_values: Team field values object to format
+        
+    Returns:
+        String with team area path details
+    """
+    formatted_info = ["# Team Area Paths"]
+    
+    # Add default area path
+    if hasattr(team_field_values, "default_value") and team_field_values.default_value:
+        formatted_info.append(f"Default Area Path: {team_field_values.default_value}")
+    
+    # Add all area paths
+    if hasattr(team_field_values, "values") and team_field_values.values:
+        formatted_info.append("\n## All Area Paths:")
+        for area_path in team_field_values.values:
+            value_str = f"- {area_path.value}"
+            if hasattr(area_path, "include_children") and area_path.include_children:
+                value_str += " (Including sub-areas)"
+            formatted_info.append(value_str)
     
     return "\n".join(formatted_info)
 
@@ -79,6 +151,82 @@ def _get_all_teams_impl(
         return f"Error retrieving teams: {str(e)}"
 
 
+def _get_team_members_impl(
+    core_client: CoreClient,
+    project_id: str,
+    team_id: str,
+    top: Optional[int] = None,
+    skip: Optional[int] = None
+) -> str:
+    """
+    Implementation of team members retrieval.
+    
+    Args:
+        core_client: Core client
+        project_id: The name or ID (GUID) of the team project the team belongs to
+        team_id: The name or ID (GUID) of the team
+        top: Maximum number of members to return
+        skip: Number of members to skip
+            
+    Returns:
+        Formatted string containing team members information
+    """
+    try:
+        team_members = core_client.get_team_members_with_extended_properties(
+            project_id=project_id,
+            team_id=team_id,
+            top=top,
+            skip=skip
+        )
+        
+        if not team_members:
+            return f"No members found for team {team_id} in project {project_id}."
+        
+        formatted_members = []
+        for member in team_members:
+            formatted_members.append(_format_team_member(member))
+        
+        return "\n\n".join(formatted_members)
+            
+    except Exception as e:
+        return f"Error retrieving team members: {str(e)}"
+
+
+def _get_team_area_paths_impl(
+    work_client,
+    project_name_or_id: str,
+    team_name_or_id: str
+) -> str:
+    """
+    Implementation of team area paths retrieval.
+    
+    Args:
+        work_client: Work client
+        project_name_or_id: The name or ID of the team project
+        team_name_or_id: The name or ID of the team
+            
+    Returns:
+        Formatted string containing team area path information
+    """
+    try:
+        # Create a TeamContext object
+        team_context = TeamContext(
+            project=project_name_or_id,
+            team=team_name_or_id
+        )
+        
+        # Get the team field values
+        team_field_values = work_client.get_team_field_values(team_context)
+        
+        if not team_field_values:
+            return f"No area paths found for team {team_name_or_id} in project {project_name_or_id}."
+        
+        return _format_team_area_path(team_field_values)
+            
+    except Exception as e:
+        return f"Error retrieving team area paths: {str(e)}"
+
+
 def register_tools(mcp) -> None:
     """
     Register team tools with the MCP server.
@@ -112,6 +260,62 @@ def register_tools(mcp) -> None:
                 user_is_member_of,
                 top,
                 skip
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+    
+    @mcp.tool()
+    def get_team_members(
+        project_id: str,
+        team_id: str,
+        top: Optional[int] = None,
+        skip: Optional[int] = None
+    ) -> str:
+        """
+        Get a list of members for a specific team.
+        
+        Args:
+            project_id: The name or ID (GUID) of the team project the team belongs to
+            team_id: The name or ID (GUID) of the team
+            top: Maximum number of members to return
+            skip: Number of members to skip
+                
+        Returns:
+            Formatted string containing team members information
+        """
+        try:
+            core_client = get_core_client()
+            return _get_team_members_impl(
+                core_client,
+                project_id,
+                team_id,
+                top,
+                skip
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+    
+    @mcp.tool()
+    def get_team_area_paths(
+        project_name_or_id: str,
+        team_name_or_id: str
+    ) -> str:
+        """
+        Get the area paths assigned to a team.
+        
+        Args:
+            project_name_or_id: The name or ID of the team project
+            team_name_or_id: The name or ID of the team
+                
+        Returns:
+            Formatted string containing team area path information
+        """
+        try:
+            work_client = get_work_client()
+            return _get_team_area_paths_impl(
+                work_client,
+                project_name_or_id,
+                team_name_or_id
             )
         except AzureDevOpsClientError as e:
             return f"Error: {str(e)}"
