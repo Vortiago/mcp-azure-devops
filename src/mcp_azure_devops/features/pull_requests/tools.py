@@ -483,7 +483,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             title: PR title
             description: PR description
             source_branch: Source branch name
@@ -497,8 +496,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _create_pull_request_impl(
                 client=client,
@@ -516,7 +514,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int,
         title: Optional[str] = None,
         description: Optional[str] = None,
@@ -529,7 +526,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR to update
             title: New PR title (optional)
             description: New PR description (optional)
@@ -542,8 +538,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _update_pull_request_impl(
                 client=client,
@@ -560,7 +555,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         status: Optional[str] = None,
         creator: Optional[str] = None,
         reviewer: Optional[str] = None,
@@ -573,7 +567,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             status: Filter by status (active, abandoned, completed, all) (optional)
             creator: Filter by creator ID (optional)
             reviewer: Filter by reviewer ID (optional)
@@ -586,8 +579,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _list_pull_requests_impl(
                 client=client,
@@ -604,7 +596,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -614,7 +605,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -624,8 +614,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _get_pull_request_impl(
                 client=client,
@@ -639,7 +628,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int,
         content: str
     ) -> str:
@@ -650,7 +638,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
             content: Comment text
         
@@ -661,8 +648,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _add_comment_impl(
                 client=client,
@@ -676,8 +662,7 @@ def register_tools(mcp) -> None:
     def approve_pull_request(
         organization: str,
         project: str,
-        repo: str,
-        personal_access_token: str,
+        repo: str,        
         pull_request_id: int
     ) -> str:
         """
@@ -687,7 +672,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -697,8 +681,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _approve_pull_request_impl(
                 client=client,
@@ -712,7 +695,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -722,7 +704,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -733,7 +714,6 @@ def register_tools(mcp) -> None:
                 organization=organization,
                 project=project,
                 repo=repo,
-                personal_access_token=personal_access_token
             )
             return _reject_pull_request_impl(
                 client=client,
@@ -747,7 +727,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int,
         merge_strategy: str = "squash",
         delete_source_branch: bool = False
@@ -759,7 +738,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
             merge_strategy: Merge strategy (squash, rebase, rebaseMerge, merge) (optional)
             delete_source_branch: Whether to delete source branch after merge (optional)
@@ -771,8 +749,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _complete_pull_request_impl(
                 client=client,
@@ -788,7 +765,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -797,8 +773,7 @@ def register_tools(mcp) -> None:
         Args:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
-            repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
+            repo: Azure DevOps repository name            
             pull_request_id: ID of the PR
         
         Returns:
@@ -808,8 +783,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _get_pull_request_work_items_impl(
                 client=client,
@@ -823,7 +797,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int,
         work_item_ids: str
     ) -> str:
@@ -834,7 +807,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
             work_item_ids: Comma-separated list of work item IDs to link
         
@@ -845,8 +817,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             
             # Parse the comma-separated list of work item IDs
@@ -867,7 +838,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -877,7 +847,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -887,8 +856,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _get_pull_request_commits_impl(
                 client=client,
@@ -902,7 +870,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -912,7 +879,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -922,8 +888,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _get_pull_request_changes_impl(
                 client=client,
@@ -937,7 +902,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int,
         thread_id: int
     ) -> str:
@@ -948,7 +912,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
             thread_id: ID of the comment thread
         
@@ -959,8 +922,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _get_pull_request_thread_comments_impl(
                 client=client,
@@ -975,7 +937,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -985,7 +946,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -995,8 +955,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _abandon_pull_request_impl(
                 client=client,
@@ -1010,7 +969,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -1020,7 +978,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -1030,8 +987,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _reactivate_pull_request_impl(
                 client=client,
@@ -1045,7 +1001,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         pull_request_id: int
     ) -> str:
         """
@@ -1055,7 +1010,6 @@ def register_tools(mcp) -> None:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
             pull_request_id: ID of the PR
         
         Returns:
@@ -1065,8 +1019,7 @@ def register_tools(mcp) -> None:
             client = AzureDevOpsClient(
                 organization=organization,
                 project=project,
-                repo=repo,
-                personal_access_token=personal_access_token
+                repo=repo
             )
             return _get_pull_request_policy_evaluations_impl(
                 client=client,

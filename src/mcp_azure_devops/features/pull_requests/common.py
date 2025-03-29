@@ -51,7 +51,7 @@ def get_pull_request_client():
 class AzureDevOpsClient:
     """Client for Azure DevOps API operations related to Pull Requests."""
     
-    def __init__(self, organization: str, project: str, repo: str, personal_access_token: str):
+    def __init__(self, organization: str, project: str, repo: str):
         """
         Initialize the Azure DevOps client.
         
@@ -59,19 +59,10 @@ class AzureDevOpsClient:
             organization: Azure DevOps organization name
             project: Azure DevOps project name
             repo: Azure DevOps repository name
-            personal_access_token: PAT with appropriate permissions
         """
         self.organization = organization
         self.project = project
         self.repo = repo
-        
-        # Create connection using SDK
-        credentials = BasicAuthentication('', personal_access_token)
-        connection = Connection(base_url=f'https://dev.azure.com/{organization}', creds=credentials)
-        if not connection:
-            raise AzureDevOpsClientError(
-                "Azure DevOps PAT or organization URL not found in environment variables."
-            )
         self.git_client = get_pull_request_client()
     
     def create_pull_request(self, title: str, description: str, source_branch: str,
