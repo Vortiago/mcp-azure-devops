@@ -1,5 +1,5 @@
 # Pull Requests feature package for Azure DevOps MCP
-from mcp_azure_devops.features.work_items import tools
+from mcp_azure_devops.features.pull_requests import tools
 
 def register(mcp):
     """
