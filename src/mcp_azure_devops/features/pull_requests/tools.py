@@ -295,6 +295,165 @@ def _complete_pull_request_impl(
         return f"Pull request {pull_request_id} completed successfully by {completed_by}\nMerge strategy: {merge_strategy}\nSource branch deleted: {delete_source_branch}"
     except Exception as e:
         return f"Error completing pull request: {str(e)}"
+    
+def _get_pull_request_work_items_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
+    """Implementation for getting work items linked to a PR."""
+    work_items = client.get_pull_request_work_items(pull_request_id=pull_request_id)
+    
+    if not work_items:
+        return "No work items are linked to this pull request."
+    
+    result = f"Work Items linked to PR #{pull_request_id}:\n\n"
+    for i, item in enumerate(work_items, 1):
+        result += f"{i}. ID: {item.get('id', 'N/A')}\n"
+        result += f"   Title: {item.get('title', 'N/A')}\n"
+        result += f"   Type: {item.get('work_item_type', 'N/A')}\n"
+        result += f"   State: {item.get('state', 'N/A')}\n\n"
+    
+    return result
+
+def _add_work_items_to_pull_request_impl(
+    client: AzureDevOpsClient, 
+    pull_request_id: int,
+    work_item_ids: List[int]
+) -> str:
+    """Implementation for linking work items to a PR."""
+    result = client.add_work_items_to_pull_request(
+        pull_request_id=pull_request_id,
+        work_item_ids=work_item_ids
+    )
+    
+    if result:
+        work_items_str = ", ".join([str(id) for id in work_item_ids])
+        return f"Successfully linked work item(s) #{work_items_str} to pull request #{pull_request_id}."
+    else:
+        return f"Failed to link work items to pull request #{pull_request_id}."
+
+def _get_pull_request_commits_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
+    """Implementation for getting commits in a PR."""
+    commits = client.get_pull_request_commits(pull_request_id=pull_request_id)
+    
+    if not commits:
+        return f"No commits found in pull request #{pull_request_id}."
+    
+    result = f"Commits in PR #{pull_request_id}:\n\n"
+    for i, commit in enumerate(commits, 1):
+        result += f"{i}. Commit ID: {commit.get('commit_id', 'N/A')[:8]}\n"
+        result += f"   Author: {commit.get('author', {}).get('name', 'N/A')}\n"
+        result += f"   Date: {commit.get('author', {}).get('date', 'N/A')}\n"
+        result += f"   Comment: {commit.get('comment', 'N/A')[:100]}"
+        if len(commit.get('comment', '')) > 100:
+            result += "..."
+        result += "\n\n"
+    
+    return result
+
+def _get_pull_request_changes_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
+    """Implementation for getting changes in a PR."""
+    changes = client.get_pull_request_changes(pull_request_id=pull_request_id)
+    
+    if not changes or not changes.get('changes'):
+        return f"No file changes found in pull request #{pull_request_id}."
+    
+    result = f"File changes in PR #{pull_request_id}:\n\n"
+    
+    for i, change in enumerate(changes.get('changes', []), 1):
+        change_type = change.get('change_type', 'N/A')
+        item = change.get('item', {})
+        path = item.get('path', 'N/A')
+        
+        result += f"{i}. {path}\n"
+        result += f"   Change type: {change_type}\n"
+        
+        if change_type == 'edit':
+            result += f"   Additions: {change.get('line_count_additions', 0)}\n"
+            result += f"   Deletions: {change.get('line_count_deletions', 0)}\n"
+        
+        result += "\n"
+    
+    # Add summary
+    additions = sum(change.get('line_count_additions', 0) for change in changes.get('changes', []))
+    deletions = sum(change.get('line_count_deletions', 0) for change in changes.get('changes', []))
+    files_changed = len(changes.get('changes', []))
+    
+    result += f"Summary: {files_changed} files changed, {additions} additions, {deletions} deletions."
+    
+    return result
+
+def _get_pull_request_thread_comments_impl(
+    client: AzureDevOpsClient, 
+    pull_request_id: int,
+    thread_id: int
+) -> str:
+    """Implementation for getting comments in a PR thread."""
+    comments = client.get_pull_request_thread_comments(
+        pull_request_id=pull_request_id,
+        thread_id=thread_id
+    )
+    
+    if not comments:
+        return f"No comments found in thread #{thread_id} of pull request #{pull_request_id}."
+    
+    result = f"Comments in thread #{thread_id} of PR #{pull_request_id}:\n\n"
+    
+    for i, comment in enumerate(comments, 1):
+        author = comment.get('author', {}).get('display_name', 'Unknown')
+        content = comment.get('content', 'N/A')
+        date = comment.get('published_date', 'N/A')
+        
+        result += f"{i}. Author: {author}\n"
+        result += f"   Date: {date}\n"
+        result += f"   Content: {content}\n\n"
+    
+    return result
+
+def _abandon_pull_request_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
+    """Implementation for abandoning a PR."""
+    result = client.abandon_pull_request(pull_request_id=pull_request_id)
+    
+    if result and result.get('status') == 'abandoned':
+        return f"Successfully abandoned pull request #{pull_request_id}."
+    else:
+        return f"Failed to abandon pull request #{pull_request_id}."
+
+def _reactivate_pull_request_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
+    """Implementation for reactivating a PR."""
+    result = client.reactivate_pull_request(pull_request_id=pull_request_id)
+    
+    if result and result.get('status') == 'active':
+        return f"Successfully reactivated pull request #{pull_request_id}."
+    else:
+        return f"Failed to reactivate pull request #{pull_request_id}."
+
+def _get_pull_request_policy_evaluations_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
+    """Implementation for getting policy evaluations for a PR."""
+    evaluations = client.get_pull_request_policy_evaluations(pull_request_id=pull_request_id)
+    
+    if not evaluations:
+        return f"No policy evaluations found for pull request #{pull_request_id}."
+    
+    result = f"Policy evaluations for PR #{pull_request_id}:\n\n"
+    
+    for i, eval in enumerate(evaluations, 1):
+        policy_type = eval.get('configuration', {}).get('type', {}).get('display_name', 'Unknown Policy')
+        status = eval.get('status', 'Unknown')
+        
+        result += f"{i}. Policy: {policy_type}\n"
+        result += f"   Status: {status}\n"
+        
+        if status == 'rejected':
+            result += f"   Reason: {eval.get('context', {}).get('error_message', 'N/A')}\n"
+        
+        result += "\n"
+    
+    # Add summary
+    approved = sum(1 for eval in evaluations if eval.get('status') == 'approved')
+    rejected = sum(1 for eval in evaluations if eval.get('status') == 'rejected')
+    pending = sum(1 for eval in evaluations if eval.get('status') == 'queued' or eval.get('status') == 'running')
+    
+    result += f"Summary: {approved} approved, {rejected} rejected, {pending} pending."
+    
+    return result                
 
 
 def register_tools(mcp) -> None:
@@ -620,6 +779,298 @@ def register_tools(mcp) -> None:
                 pull_request_id=pull_request_id,
                 merge_strategy=merge_strategy,
                 delete_source_branch=delete_source_branch
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        
+    @mcp.tool()
+    def get_pull_request_work_items(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int
+    ) -> str:
+        """
+        Get work items linked to a Pull Request in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+        
+        Returns:
+            Formatted string containing linked work items information
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            return _get_pull_request_work_items_impl(
+                client=client,
+                pull_request_id=pull_request_id
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        
+    @mcp.tool()
+    def add_work_items_to_pull_request(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int,
+        work_item_ids: str
+    ) -> str:
+        """
+        Link work items to a Pull Request in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+            work_item_ids: Comma-separated list of work item IDs to link
+        
+        Returns:
+            Formatted string indicating success or failure
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            
+            # Parse the comma-separated list of work item IDs
+            work_item_id_list = [int(id.strip()) for id in work_item_ids.split(",")]
+            
+            return _add_work_items_to_pull_request_impl(
+                client=client,
+                pull_request_id=pull_request_id,
+                work_item_ids=work_item_id_list
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        except ValueError:
+            return "Error: Work item IDs must be valid integers separated by commas."
+        
+    @mcp.tool()
+    def get_pull_request_commits(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int
+    ) -> str:
+        """
+        Get all commits in a Pull Request in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+        
+        Returns:
+            Formatted string containing commit information
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            return _get_pull_request_commits_impl(
+                client=client,
+                pull_request_id=pull_request_id
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        
+    @mcp.tool()
+    def get_pull_request_changes(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int
+    ) -> str:
+        """
+        Get all file changes in a Pull Request in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+        
+        Returns:
+            Formatted string containing file change information
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            return _get_pull_request_changes_impl(
+                client=client,
+                pull_request_id=pull_request_id
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        
+    @mcp.tool()
+    def get_pull_request_thread_comments(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int,
+        thread_id: int
+    ) -> str:
+        """
+        Get all comments in a Pull Request thread in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+            thread_id: ID of the comment thread
+        
+        Returns:
+            Formatted string containing comment information
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            return _get_pull_request_thread_comments_impl(
+                client=client,
+                pull_request_id=pull_request_id,
+                thread_id=thread_id
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        
+    @mcp.tool()
+    def abandon_pull_request(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int
+    ) -> str:
+        """
+        Abandon a Pull Request in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+        
+        Returns:
+            Formatted string indicating success or failure
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            return _abandon_pull_request_impl(
+                client=client,
+                pull_request_id=pull_request_id
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        
+    @mcp.tool()
+    def reactivate_pull_request(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int
+    ) -> str:
+        """
+        Reactivate an abandoned Pull Request in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+        
+        Returns:
+            Formatted string indicating success or failure
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            return _reactivate_pull_request_impl(
+                client=client,
+                pull_request_id=pull_request_id
+            )
+        except AzureDevOpsClientError as e:
+            return f"Error: {str(e)}"
+        
+    @mcp.tool()
+    def get_pull_request_policy_evaluations(
+        organization: str,
+        project: str,
+        repo: str,
+        personal_access_token: str,
+        pull_request_id: int
+    ) -> str:
+        """
+        Get policy evaluations for a Pull Request in Azure DevOps.
+        
+        Args:
+            organization: Azure DevOps organization name
+            project: Azure DevOps project name
+            repo: Azure DevOps repository name
+            personal_access_token: PAT with appropriate permissions
+            pull_request_id: ID of the PR
+        
+        Returns:
+            Formatted string containing policy evaluation information
+        """
+        try:
+            client = AzureDevOpsClient(
+                organization=organization,
+                project=project,
+                repo=repo,
+                personal_access_token=personal_access_token
+            )
+            return _get_pull_request_policy_evaluations_impl(
+                client=client,
+                pull_request_id=pull_request_id
             )
         except AzureDevOpsClientError as e:
             return f"Error: {str(e)}"
