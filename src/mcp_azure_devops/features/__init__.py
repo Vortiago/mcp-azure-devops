@@ -2,6 +2,7 @@
 from mcp_azure_devops.features import work_items
 from mcp_azure_devops.features import projects
 from mcp_azure_devops.features import teams
+from mcp_azure_devops.features import pull_requests
 
 def register_all(mcp):
     """
@@ -13,3 +14,4 @@ def register_all(mcp):
     work_items.register(mcp)
     projects.register(mcp)
     teams.register(mcp)
+    pull_requests.register(mcp)
