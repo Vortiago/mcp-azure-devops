@@ -406,7 +406,7 @@ class AzureDevOpsClient:
         
         Args:
             pull_request_id: ID of the PR
-            
+                
         Returns:
             List of commits in the PR
             
@@ -414,15 +414,52 @@ class AzureDevOpsClient:
             AzureDevOpsClientError: If request fails
         """
         try:
+            # Print debug information
+            print(f"Fetching commits for PR #{pull_request_id}")
+            print(f"Repository ID: {self.repo}")
+            print(f"Project: {self.project}")
+            
+            # Make the API call with correct parameters
             commits = self.git_client.get_pull_request_commits(
                 repository_id=self.repo,
                 pull_request_id=pull_request_id,
                 project=self.project
             )
             
-            return [commit.__dict__ for commit in commits]
+            # Convert the GitCommitRef objects to dictionaries properly
+            result = []
+            for commit in commits:
+                # Convert the commit to a dictionary in a safer way
+                commit_dict = {}
+                
+                # Common properties in GitCommitRef
+                if hasattr(commit, 'commit_id'):
+                    commit_dict['commitId'] = commit.commit_id
+                
+                if hasattr(commit, 'author'):
+                    commit_dict['author'] = {
+                        'name': getattr(commit.author, 'name', None),
+                        'email': getattr(commit.author, 'email', None),
+                        'date': getattr(commit.author, 'date', None)
+                    }
+                
+                if hasattr(commit, 'committer'):
+                    commit_dict['committer'] = {
+                        'name': getattr(commit.committer, 'name', None),
+                        'date': getattr(commit.committer, 'date', None)
+                    }
+                
+                if hasattr(commit, 'comment'):
+                    commit_dict['comment'] = commit.comment
+                
+                result.append(commit_dict)
+            
+            return result
         except Exception as e:
-            raise AzureDevOpsClientError(f"Failed to get pull request commits: {str(e)}")
+            # Add more details to help with debugging
+            error_message = f"Failed to get pull request commits: {str(e)}"
+            print(error_message)  # Print for immediate debugging
+            raise AzureDevOpsClientError(error_message)
         
     
     def get_pull_request_changes(self, pull_request_id: int) -> Dict[str, Any]:

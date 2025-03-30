@@ -331,22 +331,45 @@ def _add_work_items_to_pull_request_impl(
 
 def _get_pull_request_commits_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
     """Implementation for getting commits in a PR."""
-    commits = client.get_pull_request_commits(pull_request_id=pull_request_id)
-    
-    if not commits:
-        return f"No commits found in pull request #{pull_request_id}."
-    
-    result = f"Commits in PR #{pull_request_id}:\n\n"
-    for i, commit in enumerate(commits, 1):
-        result += f"{i}. Commit ID: {commit.get('commit_id', 'N/A')[:8]}\n"
-        result += f"   Author: {commit.get('author', {}).get('name', 'N/A')}\n"
-        result += f"   Date: {commit.get('author', {}).get('date', 'N/A')}\n"
-        result += f"   Comment: {commit.get('comment', 'N/A')[:100]}"
-        if len(commit.get('comment', '')) > 100:
-            result += "..."
-        result += "\n\n"
-    
-    return result
+    try:
+        commits = client.get_pull_request_commits(pull_request_id=pull_request_id)
+        
+        if not commits:
+            return f"No commits found in pull request #{pull_request_id}."
+        
+        result = f"Commits in PR #{pull_request_id}:\n\n"
+        for i, commit in enumerate(commits, 1):
+            # Handle commit ID
+            commit_id = commit.get('commitId', commit.get('commit_id', 'N/A'))
+            
+            # Handle author information with safer access
+            author = commit.get('author', {})
+            author_name = 'N/A'
+            author_date = 'N/A'
+            
+            if isinstance(author, dict):
+                author_name = author.get('name', 'N/A')
+                # Safely get date and don't try to format it
+                author_date = author.get('date', 'N/A')
+            
+            # Handle comment/message
+            comment = commit.get('comment', commit.get('commentTruncated', 
+                      commit.get('message', 'N/A')))
+            
+            # Format output
+            result += f"{i}. Commit ID: {commit_id[:8] if commit_id != 'N/A' else 'N/A'}\n"
+            result += f"   Author: {author_name}\n"
+            result += f"   Date: {author_date}\n"
+            result += f"   Comment: {comment[:100]}"
+            if comment != 'N/A' and len(comment) > 100:
+                result += "..."
+            result += "\n\n"
+        
+        return result
+    except Exception as e:
+        # Add more detailed error info
+        import traceback
+        return f"Error processing commits for PR #{pull_request_id}: {str(e)}\n{traceback.format_exc()}"
 
 def _get_pull_request_changes_impl(client: AzureDevOpsClient, pull_request_id: int) -> str:
     """Implementation for getting changes in a PR."""
@@ -469,7 +492,6 @@ def register_tools(mcp) -> None:
         organization: str,
         project: str,
         repo: str,
-        personal_access_token: str,
         title: str,
         description: str,
         source_branch: str,
