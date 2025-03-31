@@ -250,45 +250,28 @@ def _format_metrics(fields: dict) -> list[str]:
 
 def _format_related_items(work_item: WorkItem) -> list[str]:
     """
-    Format information about related items.
+    Format information about related work items using links.
     
     Args:
         work_item: The work item object
         
     Returns:
-        List of strings with related items information
+        List of strings with related work items information
     """
     related_items = []
     
+    # Check if work item has links
     if hasattr(work_item, 'relations') and work_item.relations:
-        related_items.append("\n## Related Items")
+        # Check if there are work item links
+        links_section = []
         
-        for relation in work_item.relations:
-            # Get the relation type (use getattr to safely handle missing attributes)
-            rel_type = getattr(relation, 'rel', "Unknown relation")
-            
-            # Get the target URL
-            target_url = getattr(relation, 'url', "Unknown URL")
-            
-            # Format the link based on what type it is
-            link_text = target_url
-            if "workitem" in target_url.lower():
-                # It's a work item link - try to extract the ID
-                try:
-                    work_item_id = target_url.split('/')[-1]
-                    if work_item_id.isdigit():
-                        link_text = f"Work Item #{work_item_id}"
-                except:
-                    pass  # Keep the original URL if parsing fails
-            
-            # Check for comments in attributes
-            comment = ""
-            if hasattr(relation, 'attributes') and relation.attributes:
-                attrs = relation.attributes
-                if isinstance(attrs, dict) and 'comment' in attrs and attrs['comment']:
-                    comment = f" - Comment: {attrs['comment']}"
-            
-            related_items.append(f"- {rel_type}: {link_text}{comment}")
+        links_section.append("\n## Related Items")
+        for link in work_item.relations:
+            # Look for the related work items link collection
+            related_items.append(f"- {link.rel} URL: {link.url}")
+            if hasattr(link, 'attributes') and link.attributes:
+                related_items.append(f"  :: Attributes: {link.attributes}")
+    
     
     return related_items
 

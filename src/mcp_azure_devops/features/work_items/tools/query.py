@@ -33,7 +33,9 @@ def _query_work_items_impl(query: str, top: int, wit_client: WorkItemTrackingCli
     
     # Get the work items from the results
     work_item_ids = [int(res.id) for res in wiql_results]
-    work_items = wit_client.get_work_items(ids=work_item_ids, error_policy="omit")
+    work_items = wit_client.get_work_items(ids=work_item_ids,
+                                           expand="all",
+                                           error_policy="omit")
     
     # Use the standard formatting for all work items
     formatted_results = []
