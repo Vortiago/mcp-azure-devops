@@ -45,14 +45,17 @@ python_functions = "test_*"
 [tool.ruff]
 line-length = 79
 target-version = "py310"
-select = ["E", "F", "I"]
 extend-exclude = ["docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
 
 [tool.pyright]
 exclude = [
     "**/node_modules",
     "**/__pycache__",
     "**/.*",
-    "docs/"
+    "docs/",
+    "pyproject.toml"
 ]
 
