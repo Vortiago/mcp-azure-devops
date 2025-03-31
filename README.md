@@ -9,10 +9,24 @@ This project implements a Model Context Protocol (MCP) server that allows AI ass
 ## Features
 
 Currently implemented:
-- **Work Item Management**: Query work items using WIQL
+
+### Work Item Management
+- **Query Work Items**: Search for work items using WIQL queries
+- **Get Work Item Details**: View complete work item information
+- **Create Work Items**: Add new tasks, bugs, user stories, and other work item types
+- **Update Work Items**: Modify existing work items' fields and properties
+- **Add Comments**: Post comments on work items
+- **View Comments**: Retrieve the comment history for a work item
+- **Parent-Child Relationships**: Establish hierarchy between work items
+
+### Project Management
+- **Get Projects**: View all accessible projects in the organization
+- **Get Teams**: List all teams within the organization
+- **Team Members**: View team membership information
+- **Team Area Paths**: Retrieve area paths assigned to teams
+- **Team Iterations**: Access team iteration/sprint configurations
 
 Planned features:
-- **Work Item Management**: Create and update work items
 - **Pipeline Operations**: Query pipeline status and trigger new pipeline runs
 - **Pull Request Handling**: Create, update, and review Pull Requests
 - **Sprint Management**: Plan and manage sprints and iterations
@@ -22,7 +36,7 @@ Planned features:
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.10+
 - Azure DevOps account with appropriate permissions
 - Personal Access Token (PAT) with necessary scopes for Azure DevOps API access
 
@@ -30,14 +44,14 @@ Planned features:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/mcp-azure-devops.git
+git clone https://github.com/Vortiago/mcp-azure-devops.git
 cd mcp-azure-devops
 
 # Install in development mode
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 
 # Install from PyPi
-pip install mcp_azure_devops
+pip install mcp-azure-devops
 ```
 
 ### Configuration
@@ -69,17 +83,40 @@ mcp install src/mcp_azure_devops/server.py --name "Azure DevOps Assistant"
 Show me all active bugs assigned to me in the current sprint
 ```
 
-### Create a Pull Request (Coming Soon)
+### Create a Work Item
 
 ```
-Create a pull request from feature/new-login-page to main with the title "Implement new login page"
+Create a user story in the ProjectX with the title "Implement user authentication" and assign it to john.doe@example.com
 ```
 
-### Check Pipeline Status (Coming Soon)
+### Update a Work Item
 
 ```
-What's the status of the latest build for the main branch?
+Change the status of bug #1234 to "Resolved" and add a comment explaining the fix
 ```
+
+### Team Management
+
+```
+Show me all the team members in the "Core Development" team in the "ProjectX" project
+```
+
+### View Project Structure
+
+```
+List all projects in my organization and show me the iterations for the Development team
+```
+
+## Development
+
+The project is structured into feature modules, each implementing specific Azure DevOps capabilities:
+
+- `features/work_items`: Work item management functionality
+- `features/projects`: Project management capabilities
+- `features/teams`: Team management features
+- `utils`: Common utilities and client initialization
+
+For more information on development, see the [CLAUDE.md](CLAUDE.md) file.
 
 ## Contributing
 
