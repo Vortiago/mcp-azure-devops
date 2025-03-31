@@ -3,10 +3,16 @@ Create operations for Azure DevOps work items.
 
 This module provides MCP tools for creating work items.
 """
-from typing import Optional, Dict, Any
-from azure.devops.v7_1.work_item_tracking.models import JsonPatchOperation
+import os
+from typing import Any, Dict, Optional
+
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
-from mcp_azure_devops.features.work_items.common import get_work_item_client, AzureDevOpsClientError
+from azure.devops.v7_1.work_item_tracking.models import JsonPatchOperation
+
+from mcp_azure_devops.features.work_items.common import (
+    AzureDevOpsClientError,
+    get_work_item_client,
+)
 from mcp_azure_devops.features.work_items.formatting import format_work_item
 
 
@@ -38,19 +44,38 @@ def _build_field_document(fields: Dict[str, Any], operation: str = "add") -> lis
     return document
 
 
-def _get_organization_url(work_item) -> Optional[str]:
+def _get_organization_url() -> str:
     """
-    Extract the organization URL from a work item.
+    Get the Azure DevOps organization URL from environment variables.
+    
+    Returns:
+        Organization URL string
+    """
+    return os.environ.get("AZURE_DEVOPS_ORGANIZATION_URL", "").rstrip('/')
+
+
+def _build_link_document(target_id: int, link_type: str, org_url: str) -> list:
+    """
+    Build a document for creating a link between work items.
     
     Args:
-        work_item: The work item object
+        target_id: ID of the target work item to link to
+        link_type: Type of link to create
+        org_url: Base organization URL
         
     Returns:
-        Organization URL or None if not found
+        List of JsonPatchOperation objects
     """
-    if hasattr(work_item, '_links') and hasattr(work_item._links, 'self'):
-        return work_item._links.self.href.split('/_apis')[0]
-    return None
+    return [
+        JsonPatchOperation(
+            op="add",
+            path="/relations/-",
+            value={
+                "rel": link_type,
+                "url": f"{org_url}/_apis/wit/workItems/{target_id}"
+            }
+        )
+    ]
 
 
 def _create_work_item_impl(
@@ -67,8 +92,8 @@ def _create_work_item_impl(
         fields: Dictionary of field name/value pairs to set
         project: The project name or ID
         work_item_type: Type of work item (e.g., "User Story", "Bug", "Task")
-        parent_id: Optional ID of parent work item for hierarchy
         wit_client: Work item tracking client
+        parent_id: Optional ID of parent work item for hierarchy
         
     Returns:
         Formatted string containing the created work item details
@@ -85,27 +110,22 @@ def _create_work_item_impl(
     # If parent_id is provided, establish parent-child relationship
     if parent_id:
         try:
-            org_url = _get_organization_url(new_work_item)
+            # Get organization URL from environment
+            org_url = _get_organization_url()
             
-            if org_url:
-                # Create parent-child relationship
-                link_document = [
-                    JsonPatchOperation(
-                        op="add",
-                        path="/relations/-",
-                        value={
-                            "rel": "System.LinkTypes.Hierarchy-Reverse",
-                            "url": f"{org_url}/_apis/wit/workItems/{parent_id}"
-                        }
-                    )
-                ]
-                
-                # Update the work item to add the parent link
-                new_work_item = wit_client.update_work_item(
-                    document=link_document,
-                    id=new_work_item.id,
-                    project=project
-                )
+            # Create parent-child relationship
+            link_document = _build_link_document(
+                target_id=parent_id,
+                link_type="System.LinkTypes.Hierarchy-Reverse",
+                org_url=org_url
+            )
+            
+            # Update the work item to add the parent link
+            new_work_item = wit_client.update_work_item(
+                document=link_document,
+                id=new_work_item.id,
+                project=project
+            )
         except Exception as e:
             return (f"Work item created successfully, but failed to establish "
                    f"parent-child relationship: {str(e)}\n\n"
@@ -127,8 +147,8 @@ def _update_work_item_impl(
     Args:
         id: The ID of the work item to update
         fields: Dictionary of field name/value pairs to update
-        project: Optional project name or ID
         wit_client: Work item tracking client
+        project: Optional project name or ID
         
     Returns:
         Formatted string containing the updated work item details
@@ -159,30 +179,17 @@ def _add_link_to_work_item_impl(
         source_id: ID of the source work item
         target_id: ID of the target work item
         link_type: Type of link to create
-        project: Optional project name or ID
         wit_client: Work item tracking client
+        project: Optional project name or ID
         
     Returns:
         Formatted string containing the updated work item details
     """
-    # Get organization URL from existing work item
-    source_item = wit_client.get_work_item(source_id)
-    org_url = _get_organization_url(source_item)
+    # Get organization URL from environment
+    org_url = _get_organization_url()
     
-    if not org_url:
-        return f"Error: Could not determine organization URL for work item {source_id}"
-    
-    # Prepare the link document
-    link_document = [
-        JsonPatchOperation(
-            op="add",
-            path="/relations/-",
-            value={
-                "rel": link_type,
-                "url": f"{org_url}/_apis/wit/workItems/{target_id}"
-            }
-        )
-    ]
+    # Build link document with the full URL
+    link_document = _build_link_document(target_id, link_type, org_url)
     
     # Update the work item to add the link
     updated_work_item = wit_client.update_work_item(
@@ -308,8 +315,8 @@ def register_tools(mcp) -> None:
                 fields=fields,
                 project=project,
                 work_item_type=work_item_type,
-                parent_id=parent_id,
-                wit_client=wit_client
+                wit_client=wit_client,
+                parent_id=parent_id
             )
             
         except AzureDevOpsClientError as e:
@@ -368,8 +375,8 @@ def register_tools(mcp) -> None:
             return _update_work_item_impl(
                 id=id,
                 fields=fields,
-                project=project,
-                wit_client=wit_client
+                wit_client=wit_client,
+                project=project
             )
             
         except AzureDevOpsClientError as e:
@@ -402,8 +409,8 @@ def register_tools(mcp) -> None:
                 source_id=child_id,
                 target_id=parent_id,
                 link_type="System.LinkTypes.Hierarchy-Reverse",
-                project=project,
-                wit_client=wit_client
+                wit_client=wit_client,
+                project=project
             )
             
         except AzureDevOpsClientError as e:
