@@ -1,5 +1,5 @@
 # Pull Requests feature package for Azure DevOps MCP
-from mcp_azure_devops.features.pull_requests import tools
+from mcp_azure_devops.features.pull_requests.tools import register_tools
 
 def register(mcp):
     """
@@ -8,4 +8,4 @@ def register(mcp):
     Args:
         mcp: The FastMCP server instance
     """
-    tools.register_tools(mcp)
+    register_tools(mcp)
