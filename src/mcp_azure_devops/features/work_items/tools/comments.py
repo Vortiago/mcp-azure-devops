@@ -4,9 +4,14 @@ Comment operations for Azure DevOps work items.
 This module provides MCP tools for retrieving and adding work item comments.
 """
 from typing import Optional
+
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
 from azure.devops.v7_1.work_item_tracking.models import CommentCreate
-from mcp_azure_devops.features.work_items.common import get_work_item_client, AzureDevOpsClientError
+
+from mcp_azure_devops.features.work_items.common import (
+    AzureDevOpsClientError,
+    get_work_item_client,
+)
 
 
 def _format_comment(comment) -> str:

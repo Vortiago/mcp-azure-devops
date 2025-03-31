@@ -1,7 +1,6 @@
 # Azure DevOps MCP features package
-from mcp_azure_devops.features import work_items
-from mcp_azure_devops.features import projects
-from mcp_azure_devops.features import teams
+from mcp_azure_devops.features import projects, teams, work_items
+
 
 def register_all(mcp):
     """

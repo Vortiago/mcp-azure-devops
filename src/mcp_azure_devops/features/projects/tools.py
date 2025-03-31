@@ -4,9 +4,14 @@ Project tools for Azure DevOps.
 This module provides MCP tools for working with Azure DevOps projects.
 """
 from typing import Optional
-from azure.devops.v7_1.core.models import TeamProjectReference
+
 from azure.devops.v7_1.core import CoreClient
-from mcp_azure_devops.features.projects.common import get_core_client, AzureDevOpsClientError
+from azure.devops.v7_1.core.models import TeamProjectReference
+
+from mcp_azure_devops.features.projects.common import (
+    AzureDevOpsClientError,
+    get_core_client,
+)
 
 
 def _format_project(project: TeamProjectReference) -> str:

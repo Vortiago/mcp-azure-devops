@@ -4,6 +4,7 @@ Common utilities for Azure DevOps work item features.
 This module provides shared functionality used by both tools and resources.
 """
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
+
 from mcp_azure_devops.utils.azure_client import get_connection
 
 

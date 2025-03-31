@@ -1,13 +1,19 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from azure.devops.v7_1.core.models import WebApiTeam, TeamMember, WebApiTeamRef, IdentityRef
-from azure.devops.v7_1.work.models import TeamFieldValues, TeamSettingsIteration, TeamIterationAttributes, TeamFieldValue
+from unittest.mock import MagicMock
+
+from azure.devops.v7_1.core.models import IdentityRef, TeamMember, WebApiTeam
+from azure.devops.v7_1.work.models import (
+    TeamFieldValues,
+    TeamIterationAttributes,
+    TeamSettingsIteration,
+)
+
 from mcp_azure_devops.features.teams.tools import (
     _get_all_teams_impl,
-    _get_team_members_impl,
     _get_team_area_paths_impl,
-    _get_team_iterations_impl
+    _get_team_iterations_impl,
+    _get_team_members_impl,
 )
+
 
 # Tests for _get_all_teams_impl
 def test_get_all_teams_impl_with_results():

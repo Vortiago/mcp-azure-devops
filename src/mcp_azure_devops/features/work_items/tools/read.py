@@ -4,9 +4,13 @@ Read operations for Azure DevOps work items.
 This module provides MCP tools for retrieving work item information.
 """
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
-from mcp_azure_devops.features.work_items.common import ( get_work_item_client, 
-                                                         AzureDevOpsClientError )
+
+from mcp_azure_devops.features.work_items.common import (
+    AzureDevOpsClientError,
+    get_work_item_client,
+)
 from mcp_azure_devops.features.work_items.formatting import format_work_item
+
 
 def _get_work_item_impl(item_id: int | list[int], wit_client: WorkItemTrackingClient) -> str:
     """

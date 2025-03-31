@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
 from azure.devops.v7_1.core.models import TeamProjectReference
+
 from mcp_azure_devops.features.projects.tools import _get_projects_impl
+
 
 def test_get_projects_impl_with_results():
     """Test getting projects with results."""

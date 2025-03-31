@@ -1,6 +1,7 @@
 # Teams feature package for Azure DevOps MCP
 from mcp_azure_devops.features.teams import tools
 
+
 def register(mcp):
     """
     Register all teams components with the MCP server.

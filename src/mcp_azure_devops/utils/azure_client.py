@@ -4,7 +4,7 @@ Azure DevOps client utilities.
 This module provides helper functions for connecting to Azure DevOps.
 """
 import os
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication

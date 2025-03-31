@@ -4,6 +4,7 @@ Common utilities for Azure DevOps projects features.
 This module provides shared functionality used by both tools and resources.
 """
 from azure.devops.v7_1.core import CoreClient
+
 from mcp_azure_devops.utils.azure_client import get_connection
 
 

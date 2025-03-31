@@ -4,10 +4,16 @@ Team tools for Azure DevOps.
 This module provides MCP tools for working with Azure DevOps teams.
 """
 from typing import Optional
-from azure.devops.v7_1.core.models import WebApiTeam
+
 from azure.devops.v7_1.core import CoreClient
+from azure.devops.v7_1.core.models import WebApiTeam
 from azure.devops.v7_1.work.models import TeamContext
-from mcp_azure_devops.features.teams.common import get_core_client, get_work_client, AzureDevOpsClientError
+
+from mcp_azure_devops.features.teams.common import (
+    AzureDevOpsClientError,
+    get_core_client,
+    get_work_client,
+)
 
 
 def _format_team(team: WebApiTeam) -> str:

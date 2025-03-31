@@ -1,9 +1,18 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from azure.devops.v7_1.work_item_tracking.models import WorkItem, WorkItemReference
-from mcp_azure_devops.features.work_items.tools.query import _query_work_items_impl
+from unittest.mock import MagicMock
+
+from azure.devops.v7_1.work_item_tracking.models import (
+    WorkItem,
+    WorkItemReference,
+)
+
+from mcp_azure_devops.features.work_items.tools.comments import (
+    _get_work_item_comments_impl,
+)
+from mcp_azure_devops.features.work_items.tools.query import (
+    _query_work_items_impl,
+)
 from mcp_azure_devops.features.work_items.tools.read import _get_work_item_impl
-from mcp_azure_devops.features.work_items.tools.comments import _get_work_item_comments_impl
+
 
 # Tests for _query_work_items_impl
 def test_query_work_items_impl_no_results():

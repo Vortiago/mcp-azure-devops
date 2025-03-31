@@ -4,10 +4,16 @@ Query operations for Azure DevOps work items.
 This module provides MCP tools for querying work items.
 """
 from typing import Optional
-from azure.devops.v7_1.work_item_tracking.models import Wiql
+
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
-from mcp_azure_devops.features.work_items.common import get_work_item_client, AzureDevOpsClientError
+from azure.devops.v7_1.work_item_tracking.models import Wiql
+
+from mcp_azure_devops.features.work_items.common import (
+    AzureDevOpsClientError,
+    get_work_item_client,
+)
 from mcp_azure_devops.features.work_items.formatting import format_work_item
+
 
 def _query_work_items_impl(query: str, top: int, wit_client: WorkItemTrackingClient) -> str:
     """

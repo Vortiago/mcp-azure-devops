@@ -4,7 +4,9 @@ Azure DevOps MCP Server
 A simple MCP server that exposes Azure DevOps capabilities.
 """
 import argparse
+
 from mcp.server.fastmcp import FastMCP
+
 from mcp_azure_devops.features import register_all
 
 # Create a FastMCP server instance with a name

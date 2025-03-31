@@ -1,7 +1,13 @@
 """
 Work item tools for Azure DevOps.
 """
-from mcp_azure_devops.features.work_items.tools import query, read, comments, create
+from mcp_azure_devops.features.work_items.tools import (
+    comments,
+    create,
+    query,
+    read,
+)
+
 
 def register_tools(mcp) -> None:
     """
