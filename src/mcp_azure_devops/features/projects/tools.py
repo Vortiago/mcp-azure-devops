@@ -4,9 +4,14 @@ Project tools for Azure DevOps.
 This module provides MCP tools for working with Azure DevOps projects.
 """
 from typing import Optional
-from azure.devops.v7_1.core.models import TeamProjectReference
+
 from azure.devops.v7_1.core import CoreClient
-from mcp_azure_devops.features.projects.common import get_core_client, AzureDevOpsClientError
+from azure.devops.v7_1.core.models import TeamProjectReference
+
+from mcp_azure_devops.features.projects.common import (
+    AzureDevOpsClientError,
+    get_core_client,
+)
 
 
 def _format_project(project: TeamProjectReference) -> str:
@@ -92,14 +97,24 @@ def register_tools(mcp) -> None:
         top: Optional[int] = None
     ) -> str:
         """
-        Get all projects in the organization that the authenticated user has access to.
+        Retrieves all projects accessible to the authenticated user 
+        in the Azure DevOps organization.
+        
+        Use this tool when you need to:
+        - Get an overview of all available projects
+        - Find project IDs for use in other operations
+        - Check project states and visibility settings
+        - Locate specific projects by name
         
         Args:
-            state_filter: Filter on team projects in a specific state (e.g., "WellFormed", "Deleting")
+            state_filter: Filter on team projects in a specific state 
+                (e.g., "WellFormed", "Deleting")
             top: Maximum number of projects to return
                 
         Returns:
-            Formatted string containing project information
+            Formatted string containing project information including names,
+            IDs, descriptions, states, and visibility settings, formatted as
+            markdown with each project clearly separated
         """
         try:
             core_client = get_core_client()

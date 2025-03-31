@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
 from azure.devops.v7_1.core.models import TeamProjectReference
+
 from mcp_azure_devops.features.projects.tools import _get_projects_impl
+
 
 def test_get_projects_impl_with_results():
     """Test getting projects with results."""
@@ -69,7 +71,8 @@ def test_get_projects_impl_with_filters():
     result = _get_projects_impl(mock_client, state_filter="wellFormed", top=5)
     
     # Check that the filter parameters were passed to the client
-    mock_client.get_projects.assert_called_with(state_filter="wellFormed", top=5)
+    mock_client.get_projects.assert_called_with(
+        state_filter="wellFormed", top=5)
     
     # Check result contains the filtered project
     assert "# Project: Filtered Project" in result
