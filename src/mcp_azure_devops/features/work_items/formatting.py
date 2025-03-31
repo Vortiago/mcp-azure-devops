@@ -35,7 +35,8 @@ def _format_header(work_item: WorkItem, fields: dict) -> list[str]:
     # Add link to the work item (if available)
     try:
         if hasattr(work_item, '_links') and work_item._links:
-            if hasattr(work_item._links, 'html') and hasattr(work_item._links.html, 'href'):
+            if (hasattr(work_item._links, 'html') and 
+                    hasattr(work_item._links.html, 'href')):
                 header.append(f"Web URL: {work_item._links.html.href}")
     except Exception:
         # If any error occurs, just skip adding the URL
@@ -93,10 +94,14 @@ def _format_people_info(fields: dict) -> list[str]:
     
     if "System.AssignedTo" in fields:
         assigned_to = fields['System.AssignedTo']
-        # Handle the AssignedTo object which could be a dict or dictionary-like object
-        if hasattr(assigned_to, 'display_name') and hasattr(assigned_to, 'unique_name'):
+        # Handle the AssignedTo object which could be a dict or dict-like 
+        # object
+        if (hasattr(assigned_to, 'display_name') and 
+                hasattr(assigned_to, 'unique_name')):
             # If it's an object with directly accessible properties
-            people_info.append(f"Assigned To: {assigned_to.display_name} ({assigned_to.unique_name})")
+            people_info.append(
+                f"Assigned To: {assigned_to.display_name} "
+                f"({assigned_to.unique_name})")
         elif isinstance(assigned_to, dict):
             # If it's a dictionary
             display_name = assigned_to.get('displayName', '')
@@ -157,15 +162,19 @@ def _format_dates(fields: dict) -> list[str]:
     
     # Add state change date (if available)
     if "Microsoft.VSTS.Common.StateChangeDate" in fields:
-        date_info.append(f"State Changed: {fields['Microsoft.VSTS.Common.StateChangeDate']}")
+        date_info.append(
+            f"State Changed: "
+            f"{fields['Microsoft.VSTS.Common.StateChangeDate']}")
     
     # Add activated date (if available)
     if "Microsoft.VSTS.Common.ActivatedDate" in fields:
-        date_info.append(f"Activated Date: {fields['Microsoft.VSTS.Common.ActivatedDate']}")
+        date_info.append(
+            f"Activated Date: {fields['Microsoft.VSTS.Common.ActivatedDate']}")
     
     # Add resolved date (if available)
     if "Microsoft.VSTS.Common.ResolvedDate" in fields:
-        date_info.append(f"Resolved Date: {fields['Microsoft.VSTS.Common.ResolvedDate']}")
+        date_info.append(
+            f"Resolved Date: {fields['Microsoft.VSTS.Common.ResolvedDate']}")
     
     # Add last updated information
     if "System.ChangedDate" in fields:
@@ -175,11 +184,16 @@ def _format_dates(fields: dict) -> list[str]:
         if "System.ChangedBy" in fields:
             changed_by = fields['System.ChangedBy']
             if hasattr(changed_by, 'display_name'):
-                date_info.append(f"Last updated {changed_date} by {changed_by.display_name}")
+                date_info.append(
+                    f"Last updated {changed_date} by "
+                    f"{changed_by.display_name}")
             elif isinstance(changed_by, dict) and 'displayName' in changed_by:
-                date_info.append(f"Last updated {changed_date} by {changed_by['displayName']}")
+                date_info.append(
+                    f"Last updated {changed_date} by "
+                    f"{changed_by['displayName']}")
             else:
-                date_info.append(f"Last updated {changed_date} by {changed_by}")
+                date_info.append(
+                    f"Last updated {changed_date} by {changed_by}")
         else:
             date_info.append(f"Last updated: {changed_date}")
     
@@ -206,7 +220,8 @@ def _format_categorization(fields: dict) -> list[str]:
     
     # Add value area (if available)
     if "Microsoft.VSTS.Common.ValueArea" in fields:
-        categorization.append(f"Value Area: {fields['Microsoft.VSTS.Common.ValueArea']}")
+        categorization.append(
+            f"Value Area: {fields['Microsoft.VSTS.Common.ValueArea']}")
     
     # Add risk (if available)
     if "Microsoft.VSTS.Common.Risk" in fields:
@@ -214,7 +229,8 @@ def _format_categorization(fields: dict) -> list[str]:
     
     # Add severity (if available)
     if "Microsoft.VSTS.Common.Severity" in fields:
-        categorization.append(f"Severity: {fields['Microsoft.VSTS.Common.Severity']}")
+        categorization.append(
+            f"Severity: {fields['Microsoft.VSTS.Common.Severity']}")
     
     # Add tags
     if "System.Tags" in fields and fields["System.Tags"]:
@@ -239,11 +255,13 @@ def _format_metrics(fields: dict) -> list[str]:
     if "Microsoft.VSTS.Common.Priority" in fields:
         metrics.append(f"Priority: {fields['Microsoft.VSTS.Common.Priority']}")
     
-    # Add effort/story points (could be in different fields depending on process template)
+    # Add effort/story points (could be in different fields depending on 
+    # process template)
     if "Microsoft.VSTS.Scheduling.Effort" in fields:
         metrics.append(f"Effort: {fields['Microsoft.VSTS.Scheduling.Effort']}")
     if "Microsoft.VSTS.Scheduling.StoryPoints" in fields:
-        metrics.append(f"Story Points: {fields['Microsoft.VSTS.Scheduling.StoryPoints']}")
+        metrics.append(
+            f"Story Points: {fields['Microsoft.VSTS.Scheduling.StoryPoints']}")
     
     return metrics
 
@@ -309,19 +327,25 @@ def _format_scheduling_info(fields: dict) -> list[str]:
     
     # Add start date (if available)
     if "Microsoft.VSTS.Scheduling.StartDate" in fields:
-        scheduling_info.append(f"Start Date: {fields['Microsoft.VSTS.Scheduling.StartDate']}")
+        scheduling_info.append(
+            f"Start Date: {fields['Microsoft.VSTS.Scheduling.StartDate']}")
     
     # Add finish date (if available)
     if "Microsoft.VSTS.Scheduling.FinishDate" in fields:
-        scheduling_info.append(f"Finish Date: {fields['Microsoft.VSTS.Scheduling.FinishDate']}")
+        scheduling_info.append(
+            f"Finish Date: {fields['Microsoft.VSTS.Scheduling.FinishDate']}")
     
     # Add remaining work (if available)
     if "Microsoft.VSTS.Scheduling.RemainingWork" in fields:
-        scheduling_info.append(f"Remaining Work: {fields['Microsoft.VSTS.Scheduling.RemainingWork']} hours")
+        scheduling_info.append(
+            f"Remaining Work: "
+            f"{fields['Microsoft.VSTS.Scheduling.RemainingWork']} hours")
     
     # Add completed work (if available)
     if "Microsoft.VSTS.Scheduling.CompletedWork" in fields:
-        scheduling_info.append(f"Completed Work: {fields['Microsoft.VSTS.Scheduling.CompletedWork']} hours")
+        scheduling_info.append(
+            f"Completed Work: "
+            f"{fields['Microsoft.VSTS.Scheduling.CompletedWork']} hours")
     
     return scheduling_info
 
@@ -344,7 +368,8 @@ def _format_board_info(fields: dict) -> list[str]:
         
         # Add board column done state (if available)
         if "System.BoardColumnDone" in fields:
-            done_state = "Done" if fields["System.BoardColumnDone"] else "Not Done"
+            done_state = ("Done" if fields["System.BoardColumnDone"] 
+                          else "Not Done")
             board_info.append(f"Column State: {done_state}")
     
     return board_info
@@ -364,11 +389,14 @@ def _format_build_info(fields: dict) -> list[str]:
     
     # Add found in build (if available)
     if "Microsoft.VSTS.Build.FoundIn" in fields:
-        build_info.append(f"Found In: {fields['Microsoft.VSTS.Build.FoundIn']}")
+        build_info.append(
+            f"Found In: {fields['Microsoft.VSTS.Build.FoundIn']}")
     
     # Add integration build (if available)
     if "Microsoft.VSTS.Build.IntegrationBuild" in fields:
-        build_info.append(f"Integration Build: {fields['Microsoft.VSTS.Build.IntegrationBuild']}")
+        build_info.append(
+            f"Integration Build: "
+            f"{fields['Microsoft.VSTS.Build.IntegrationBuild']}")
     
     return build_info
 

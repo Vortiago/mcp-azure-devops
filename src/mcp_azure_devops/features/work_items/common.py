@@ -28,13 +28,15 @@ def get_work_item_client() -> WorkItemTrackingClient:
     
     if not connection:
         raise AzureDevOpsClientError(
-            "Azure DevOps PAT or organization URL not found in environment variables."
+            "Azure DevOps PAT or organization URL not found in "
+            "environment variables."
         )
     
     # Get the work item tracking client
     wit_client = connection.clients.get_work_item_tracking_client()
     
     if wit_client is None:
-        raise AzureDevOpsClientError("Failed to get work item tracking client.")
+        raise AzureDevOpsClientError(
+            "Failed to get work item tracking client.")
     
     return wit_client

@@ -32,7 +32,8 @@ def _format_comment(comment) -> str:
     # Format the author if available
     author = "Unknown"
     if hasattr(comment, 'created_by') and comment.created_by:
-        if hasattr(comment.created_by, 'display_name') and comment.created_by.display_name:
+        if (hasattr(comment.created_by, 'display_name') and 
+                comment.created_by.display_name):
             author = comment.created_by.display_name
     
     # Format the comment text
@@ -94,7 +95,9 @@ def _get_work_item_comments_impl(
     comments = wit_client.get_comments(project=project, work_item_id=item_id)
     
     # Format the comments
-    formatted_comments = [_format_comment(comment) for comment in comments.comments]
+    formatted_comments = [
+        _format_comment(comment) for comment in comments.comments
+    ]
     
     if not formatted_comments:
         return "No comments found for this work item."
@@ -158,7 +161,9 @@ def register_tools(mcp) -> None:
     
         Args:
             id: The work item ID
-            project: Optional project name. If not provided, will be determined from the work item.
+            project: Optional project name. If not provided, will be 
+                determined 
+                from the work item.
             
         Returns:
             Formatted string containing all comments on the work item
@@ -182,7 +187,9 @@ def register_tools(mcp) -> None:
         Args:
             id: The work item ID
             text: The text of the comment
-            project: Optional project name. If not provided, will be determined from the work item.
+            project: Optional project name. If not provided, will be 
+                determined 
+                from the work item.
             
         Returns:
             Formatted string containing the added comment

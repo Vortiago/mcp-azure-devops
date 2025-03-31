@@ -79,7 +79,8 @@ def test_get_all_teams_impl_with_filters():
     
     mock_client.get_all_teams.return_value = [mock_team]
     
-    result = _get_all_teams_impl(mock_client, user_is_member_of=True, top=5, skip=0)
+    result = _get_all_teams_impl(
+        mock_client, user_is_member_of=True, top=5, skip=0)
     
     # Check that the filter parameters were passed to the client
     mock_client.get_all_teams.assert_called_with(
@@ -108,11 +109,13 @@ def test_get_team_members_impl_with_results():
     mock_identity2.id = "member-id-2"
     mock_member2.identity = mock_identity2
     
-    mock_client.get_team_members_with_extended_properties.return_value = [mock_member1, mock_member2]
+    mock_client.get_team_members_with_extended_properties.return_value = [
+        mock_member1, mock_member2]
     
     result = _get_team_members_impl(mock_client, "proj-id-1", "team-id-1")
     
-    # Check that the result contains the expected member information - using # not ##
+    # Check that the result contains the expected member information
+    # using # not ##
     assert "# Member: Member 1" in result
     assert "ID: member-id-1" in result
     assert "Email/Username: member1@example.com" in result
@@ -128,12 +131,14 @@ def test_get_team_members_impl_no_results():
     result = _get_team_members_impl(mock_client, "proj-id-1", "team-id-1")
     
     # Match exact message from implementation
-    assert result == "No members found for team team-id-1 in project proj-id-1."
+    assert result == ("No members found for team team-id-1 in "
+                      "project proj-id-1.")
 
 def test_get_team_members_impl_error():
     """Test error handling in get_team_members_impl."""
     mock_client = MagicMock()
-    mock_client.get_team_members_with_extended_properties.side_effect = Exception("Test error")
+    mock_client.get_team_members_with_extended_properties.side_effect = (
+        Exception("Test error"))
     
     result = _get_team_members_impl(mock_client, "proj-id-1", "team-id-1")
     
@@ -214,7 +219,8 @@ def test_get_team_iterations_impl_with_results():
     mock_iteration2.path = "Project\\Sprint 2"
     mock_iteration2.attributes = MagicMock(spec=TeamIterationAttributes)
     
-    mock_client.get_team_iterations.return_value = [mock_iteration1, mock_iteration2]
+    mock_client.get_team_iterations.return_value = [
+        mock_iteration1, mock_iteration2]
     
     result = _get_team_iterations_impl(mock_client, "Project", "Team")
     
@@ -258,7 +264,8 @@ def test_get_team_iterations_impl_with_current_parameter():
     
     mock_client.get_team_iterations.return_value = [mock_iteration]
     
-    result = _get_team_iterations_impl(mock_client, "Project", "Team", current=True)
+    result = _get_team_iterations_impl(
+        mock_client, "Project", "Team", current=True)
     
     # Using a more flexible approach to check the timeframe parameter
     # Store the call arguments

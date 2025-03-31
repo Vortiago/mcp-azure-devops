@@ -97,10 +97,12 @@ def register_tools(mcp) -> None:
         top: Optional[int] = None
     ) -> str:
         """
-        Get all projects in the organization that the authenticated user has access to.
+        Get all projects in the organization that the authenticated user has 
+        access to.
         
         Args:
-            state_filter: Filter on team projects in a specific state (e.g., "WellFormed", "Deleting")
+            state_filter: Filter on team projects in a specific state 
+                (e.g., "WellFormed", "Deleting")
             top: Maximum number of projects to return
                 
         Returns:

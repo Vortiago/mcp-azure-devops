@@ -101,15 +101,18 @@ def _format_team_area_path(team_field_values) -> str:
     formatted_info = ["# Team Area Paths"]
     
     # Add default area path
-    if hasattr(team_field_values, "default_value") and team_field_values.default_value:
-        formatted_info.append(f"Default Area Path: {team_field_values.default_value}")
+    if (hasattr(team_field_values, "default_value") and 
+            team_field_values.default_value):
+        formatted_info.append(
+            f"Default Area Path: {team_field_values.default_value}")
     
     # Add all area paths
     if hasattr(team_field_values, "values") and team_field_values.values:
         formatted_info.append("\n## All Area Paths:")
         for area_path in team_field_values.values:
             value_str = f"- {area_path.value}"
-            if hasattr(area_path, "include_children") and area_path.include_children:
+            if (hasattr(area_path, "include_children") and 
+                    area_path.include_children):
                 value_str += " (Including sub-areas)"
             formatted_info.append(value_str)
     
@@ -167,8 +170,9 @@ def _get_all_teams_impl(
     
     Args:
         core_client: Core client
-        user_is_member_of: If true, then return all teams requesting user is member.
-                          Otherwise return all teams user has read access.
+        user_is_member_of: If true, then return all teams requesting user is
+                          member. Otherwise return all teams user has read 
+                          access.
         top: Maximum number of teams to return
         skip: Number of teams to skip
             
@@ -176,7 +180,8 @@ def _get_all_teams_impl(
         Formatted string containing team information
     """
     try:
-        # Call the SDK function - note we're mapping user_is_member_of to mine parameter
+        # Call the SDK function - note we're mapping user_is_member_of to mine
+        # param
         teams = core_client.get_all_teams(
             mine=user_is_member_of,
             top=top,
@@ -208,7 +213,8 @@ def _get_team_members_impl(
     
     Args:
         core_client: Core client
-        project_id: The name or ID (GUID) of the team project the team belongs to
+        project_id: The name or ID (GUID) of the team project the team 
+                    belongs to
         team_id: The name or ID (GUID) of the team
         top: Maximum number of members to return
         skip: Number of members to skip
@@ -225,7 +231,8 @@ def _get_team_members_impl(
         )
         
         if not team_members:
-            return f"No members found for team {team_id} in project {project_id}."
+            return (f"No members found for team {team_id} in "
+                    f"project {project_id}.")
         
         formatted_members = []
         for member in team_members:
@@ -264,7 +271,8 @@ def _get_team_area_paths_impl(
         team_field_values = work_client.get_team_field_values(team_context)
         
         if not team_field_values:
-            return f"No area paths found for team {team_name_or_id} in project {project_name_or_id}."
+            return (f"No area paths found for team {team_name_or_id} "
+                    f"in project {project_name_or_id}.")
         
         return _format_team_area_path(team_field_values)
             
@@ -307,7 +315,8 @@ def _get_team_iterations_impl(
         )
         
         if not team_iterations:
-            return f"No iterations found for team {team_name_or_id} in project {project_name_or_id}."
+            return (f"No iterations found for team {team_name_or_id} "
+                    f"in project {project_name_or_id}.")
         
         formatted_iterations = []
         for iteration in team_iterations:
@@ -337,8 +346,10 @@ def register_tools(mcp) -> None:
         Get a list of all teams in the organization.
         
         Args:
-            user_is_member_of: If true, return only teams where the current user is a member.
-                              Otherwise return all teams the user has read access to.
+            user_is_member_of: If true, return only teams where the current 
+                user 
+                              is a member. Otherwise return all teams the user 
+                              has read access to.
             top: Maximum number of teams to return
             skip: Number of teams to skip
                 
@@ -367,7 +378,8 @@ def register_tools(mcp) -> None:
         Get a list of members for a specific team.
         
         Args:
-            project_id: The name or ID (GUID) of the team project the team belongs to
+            project_id: The name or ID (GUID) of the team project the team 
+                        belongs to
             team_id: The name or ID (GUID) of the team
             top: Maximum number of members to return
             skip: Number of members to skip

@@ -55,7 +55,8 @@ def test_query_work_items_impl_with_results():
         "System.State": "Closed"
     }
     
-    mock_client.get_work_items.return_value = [mock_work_item1, mock_work_item2]
+    mock_client.get_work_items.return_value = [
+        mock_work_item1, mock_work_item2]
     
     result = _query_work_items_impl("SELECT * FROM WorkItems", 10, mock_client)
     
@@ -105,7 +106,10 @@ def test_get_work_item_impl_detailed():
         "System.State": "Active",
         "System.TeamProject": "Test Project",
         "System.Description": "This is a description",
-        "System.AssignedTo": {"displayName": "Test User", "uniqueName": "test@example.com"},
+        "System.AssignedTo": {
+            "displayName": "Test User", 
+            "uniqueName": "test@example.com"
+        },
         "System.CreatedBy": {"displayName": "Creator User"},
         "System.CreatedDate": "2023-01-01",
         "System.IterationPath": "Project\\Sprint 1",

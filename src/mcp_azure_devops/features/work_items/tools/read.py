@@ -12,7 +12,8 @@ from mcp_azure_devops.features.work_items.common import (
 from mcp_azure_devops.features.work_items.formatting import format_work_item
 
 
-def _get_work_item_impl(item_id: int | list[int], wit_client: WorkItemTrackingClient) -> str:
+def _get_work_item_impl(item_id: int | list[int], 
+                        wit_client: WorkItemTrackingClient) -> str:
     """
     Implementation of work item retrieval.
     
@@ -69,7 +70,8 @@ def register_tools(mcp) -> None:
             id: The work item ID or a list of work item IDs
             
         Returns:
-            Formatted string containing comprehensive information for the requested
+            Formatted string containing comprehensive information for the 
+            requested
             work item(s)
         """
         try:

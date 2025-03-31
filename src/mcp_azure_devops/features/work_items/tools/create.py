@@ -16,7 +16,8 @@ from mcp_azure_devops.features.work_items.common import (
 from mcp_azure_devops.features.work_items.formatting import format_work_item
 
 
-def _build_field_document(fields: Dict[str, Any], operation: str = "add") -> list:
+def _build_field_document(fields: Dict[str, Any], 
+                          operation: str = "add") -> list:
     """
     Build a document of JsonPatchOperations from a dictionary of fields.
     
@@ -31,7 +32,8 @@ def _build_field_document(fields: Dict[str, Any], operation: str = "add") -> lis
     
     for field_name, field_value in fields.items():
         # Ensure field names are prefixed with /fields/
-        path = field_name if field_name.startswith("/fields/") else f"/fields/{field_name}"
+        path = (field_name if field_name.startswith("/fields/") 
+                else f"/fields/{field_name}")
         
         document.append(
             JsonPatchOperation(
@@ -290,7 +292,8 @@ def register_tools(mcp) -> None:
         Args:
             title: The title of the work item
             project: The project name or ID where the work item will be created
-            work_item_type: Type of work item (e.g., "User Story", "Bug", "Task")
+            work_item_type: Type of work item (e.g., "User Story", "Bug", 
+                "Task")
             description: Optional description of the work item
             state: Optional initial state for the work item
             assigned_to: Optional user email to assign the work item to

@@ -15,7 +15,8 @@ from mcp_azure_devops.features.work_items.common import (
 from mcp_azure_devops.features.work_items.formatting import format_work_item
 
 
-def _query_work_items_impl(query: str, top: int, wit_client: WorkItemTrackingClient) -> str:
+def _query_work_items_impl(query: str, top: int, 
+                           wit_client: WorkItemTrackingClient) -> str:
     """
     Implementation of query_work_items that operates with a client.
     

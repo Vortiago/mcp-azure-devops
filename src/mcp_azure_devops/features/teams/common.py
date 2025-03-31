@@ -29,7 +29,8 @@ def get_core_client() -> CoreClient:
     
     if not connection:
         raise AzureDevOpsClientError(
-            "Azure DevOps PAT or organization URL not found in environment variables."
+            "Azure DevOps PAT or organization URL not found in "
+            "environment variables."
         )
     
     # Get the core client
@@ -56,7 +57,8 @@ def get_work_client() -> WorkClient:
     
     if not connection:
         raise AzureDevOpsClientError(
-            "Azure DevOps PAT or organization URL not found in environment variables."
+            "Azure DevOps PAT or organization URL not found in "
+            "environment variables."
         )
     
     # Get the work client
