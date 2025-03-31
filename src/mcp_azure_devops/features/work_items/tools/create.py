@@ -287,7 +287,17 @@ def register_tools(mcp) -> None:
         tags: Optional[str] = None,
     ) -> str:
         """
-        Create a new work item.
+        Creates a new work item in Azure DevOps.
+        
+        Use this tool when you need to:
+        - Add a new task, user story, bug, or other work item to a project
+        - Create work items with specific field values and metadata
+        - Establish work hierarchies by setting parent relationships
+        - Track new requirements, features, or issues in your project
+        
+        IMPORTANT: The work item will be created immediately and visible to all
+        users with access to the specified project. It will also trigger any
+        configured notifications or automation rules.
         
         Args:
             title: The title of the work item
@@ -305,7 +315,9 @@ def register_tools(mcp) -> None:
             tags: Optional tags as comma-separated string
             
         Returns:
-            Formatted string containing the created work item details
+            Formatted string containing the created work item details including
+            ID, title, type, state, and all other specified fields, formatted
+            as markdown
         """
         try:
             wit_client = get_work_item_client()
@@ -343,7 +355,19 @@ def register_tools(mcp) -> None:
         tags: Optional[str] = None,
     ) -> str:
         """
-        Update an existing work item.
+        Modifies an existing work item's fields and properties.
+        
+        Use this tool when you need to:
+        - Change the status or state of a work item
+        - Reassign work to a different team member
+        - Update the description or details of a requirement
+        - Modify effort estimates or priority levels
+        - Add or change classification (area/iteration)
+        
+        IMPORTANT: This tool updates the work item directly in Azure DevOps.
+        Changes will be immediately visible to all users with access to the
+        work item and will trigger any configured notifications or workflows.
+        You must specify at least one field to update.
         
         Args:
             id: The ID of the work item to update
@@ -359,7 +383,8 @@ def register_tools(mcp) -> None:
             tags: Optional new tags as comma-separated string
             
         Returns:
-            Formatted string containing the updated work item details
+            Formatted string containing the updated work item details with
+            all current field values, formatted as markdown
         """
         try:
             wit_client = get_work_item_client()
@@ -395,7 +420,18 @@ def register_tools(mcp) -> None:
         project: Optional[str] = None,
     ) -> str:
         """
-        Add a parent-child relationship between two work items.
+        Adds a parent-child relationship between two work items.
+        
+        Use this tool when you need to:
+        - Establish hierarchy between work items
+        - Organize epics, features, user stories, and tasks
+        - Create a structured breakdown of work
+        - Enable rollup of effort and progress tracking
+        
+        IMPORTANT: The child work item will immediately appear under the parent
+        in hierarchical views. This relationship affects how the items are
+        displayed in backlogs and boards. In Azure DevOps, a work item can have
+        only one parent but multiple children.
         
         Args:
             parent_id: ID of the parent work item
@@ -404,6 +440,7 @@ def register_tools(mcp) -> None:
             
         Returns:
             Formatted string containing the updated child work item details
+            showing the new parent relationship, formatted as markdown
         """
         try:
             wit_client = get_work_item_client()

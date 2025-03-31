@@ -63,14 +63,26 @@ def register_tools(mcp) -> None:
     @mcp.tool()
     def query_work_items(query: str, top: Optional[int] = None) -> str:
         """
-        Query work items using WIQL.
+        Searches for work items using Work Item Query Language (WIQL).
+        
+        Use this tool when you need to:
+        - Find work items matching specific criteria
+        - Search across projects for related tasks or bugs
+        - Create dynamic reports based on work item attributes
+        - Identify work items assigned to specific team members
+        
+        IMPORTANT: WIQL syntax is similar to SQL and allows you to query
+        work items based on their fields. The query must follow Azure DevOps
+        WIQL syntax rules, with proper SELECT, FROM, and WHERE clauses.
         
         Args:
-            query: The WIQL query string
+            query: The WIQL query string (e.g., "SELECT * FROM workitems 
+                WHERE [System.State] = 'Active'")
             top: Maximum number of results to return (default: 30)
                 
         Returns:
-            Formatted string containing work item details
+            Formatted string containing detailed information for each matching
+            work item, with all fields and values formatted as markdown
         """
         try:
             wit_client = get_work_item_client()

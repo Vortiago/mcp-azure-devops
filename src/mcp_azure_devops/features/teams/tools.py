@@ -343,18 +343,25 @@ def register_tools(mcp) -> None:
         skip: Optional[int] = None
     ) -> str:
         """
-        Get a list of all teams in the organization.
+        Retrieves all teams in the Azure DevOps organization.
+        
+        Use this tool when you need to:
+        - Get an overview of all teams across projects
+        - Find team IDs for use in other operations
+        - Determine which teams exist in the organization
+        - Locate specific teams by name
         
         Args:
             user_is_member_of: If true, return only teams where the current 
-                user 
-                              is a member. Otherwise return all teams the user 
-                              has read access to.
+                user is a member. Otherwise return all teams the user 
+                has read access to.
             top: Maximum number of teams to return
             skip: Number of teams to skip
                 
         Returns:
-            Formatted string containing team information
+            Formatted string containing team information including names,
+            IDs, descriptions, and associated projects, formatted as
+            markdown with each team clearly separated
         """
         try:
             core_client = get_core_client()
@@ -375,17 +382,25 @@ def register_tools(mcp) -> None:
         skip: Optional[int] = None
     ) -> str:
         """
-        Get a list of members for a specific team.
+        Retrieves the membership roster for a specific team.
+        
+        Use this tool when you need to:
+        - See who belongs to a particular team
+        - Find team administrators
+        - Check user assignments across teams
+        - Determine team size and composition
         
         Args:
             project_id: The name or ID (GUID) of the team project the team 
-                        belongs to
+                belongs to
             team_id: The name or ID (GUID) of the team
             top: Maximum number of members to return
             skip: Number of members to skip
                 
         Returns:
-            Formatted string containing team members information
+            Formatted string containing team members information including
+            display names, emails, IDs, and administrator status, formatted
+            as markdown with each member clearly separated
         """
         try:
             core_client = get_core_client()
@@ -405,14 +420,26 @@ def register_tools(mcp) -> None:
         team_name_or_id: str
     ) -> str:
         """
-        Get the area paths assigned to a team.
+        Retrieves the area paths assigned to a specific team.
+        
+        Use this tool when you need to:
+        - Understand a team's areas of responsibility
+        - Check default area path assignments
+        - Determine how work is classified and routed to teams
+        - Set up board and backlog configurations
+        
+        IMPORTANT: Area paths in Azure DevOps determine which work items appear
+        on a team's backlogs and boards. The default area path is used when
+        creating new work items through a team's interface.
         
         Args:
             project_name_or_id: The name or ID of the team project
             team_name_or_id: The name or ID of the team
                 
         Returns:
-            Formatted string containing team area path information
+            Formatted string containing team area path information including
+            the default area path and all assigned paths, with indicators for
+            paths that include sub-areas
         """
         try:
             work_client = get_work_client()
@@ -431,7 +458,17 @@ def register_tools(mcp) -> None:
         current: Optional[bool] = None
     ) -> str:
         """
-        Get the iterations assigned to a team.
+        Retrieves the iterations (sprints) assigned to a specific team.
+        
+        Use this tool when you need to:
+        - View a team's sprint schedule
+        - Find date ranges for iterations
+        - Determine which iteration is currently active
+        - Plan work based on team's iteration calendar
+        
+        IMPORTANT: Iterations in Azure DevOps define time periods for planning
+        and tracking work. They determine sprint dates and are used for
+        capacity planning, burndown charts, and velocity calculations.
         
         Args:
             project_name_or_id: The name or ID of the team project
@@ -439,7 +476,9 @@ def register_tools(mcp) -> None:
             current: If True, return only the current iteration
                 
         Returns:
-            Formatted string containing team iteration information
+            Formatted string containing team iteration information including
+            names, date ranges, and time frames (past/current/future),
+            formatted as markdown
         """
         try:
             work_client = get_work_client()

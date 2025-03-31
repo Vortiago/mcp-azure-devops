@@ -64,15 +64,21 @@ def register_tools(mcp) -> None:
     @mcp.tool()
     def get_work_item(id: int | list[int]) -> str:
         """
-        Get detailed information about one or multiple work items.
+        Retrieves detailed information about one or multiple work items.
+        
+        Use this tool when you need to:
+        - View the complete details of a specific work item
+        - Examine the current state, assigned user, and other properties
+        - Get information about multiple work items at once
+        - Access the full description and custom fields of work items
         
         Args:
             id: The work item ID or a list of work item IDs
             
         Returns:
-            Formatted string containing comprehensive information for the 
-            requested
-            work item(s)
+            Formatted string containing comprehensive information for the
+            requested work item(s), including all system and custom fields,
+            formatted as markdown with clear section headings
         """
         try:
             wit_client = get_work_item_client()

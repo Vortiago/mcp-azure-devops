@@ -157,16 +157,23 @@ def register_tools(mcp) -> None:
         project: Optional[str] = None
     ) -> str:
         """
-        Get all comments for a work item.
+        Retrieves all comments associated with a specific work item.
     
+        Use this tool when you need to:
+        - Review discussion history about a work item
+        - See feedback or notes left by team members
+        - Check if specific questions have been answered
+        - Understand the context and evolution of a work item
+        
         Args:
             id: The work item ID
             project: Optional project name. If not provided, will be 
-                determined 
-                from the work item.
+                determined from the work item.
             
         Returns:
-            Formatted string containing all comments on the work item
+            Formatted string containing all comments on the work item, including
+            author names, timestamps, and content, organized chronologically and
+            formatted as markdown
         """
         try:
             wit_client = get_work_item_client()
@@ -182,17 +189,28 @@ def register_tools(mcp) -> None:
         project: Optional[str] = None
     ) -> str:
         """
-        Add a comment to a work item.
+        Adds a new comment to a work item.
     
+        Use this tool when you need to:
+        - Provide feedback or clarification on a work item
+        - Document decisions made about the work
+        - Add context without changing the work item's fields
+        - Communicate with team members about specific tasks
+        
+        IMPORTANT: Comments in Azure DevOps become part of the permanent work
+        item history and cannot be edited or deleted after they are added. The
+        comment will be attributed to the user associated with the Personal
+        Access Token used for authentication.
+        
         Args:
             id: The work item ID
-            text: The text of the comment
+            text: The text of the comment (supports markdown formatting)
             project: Optional project name. If not provided, will be 
-                determined 
-                from the work item.
+                determined from the work item.
             
         Returns:
-            Formatted string containing the added comment
+            Formatted string containing confirmation and the added comment with
+            author information and timestamp
         """
         try:
             wit_client = get_work_item_client()
