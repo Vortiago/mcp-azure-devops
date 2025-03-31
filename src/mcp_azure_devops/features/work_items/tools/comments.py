@@ -171,9 +171,9 @@ def register_tools(mcp) -> None:
                 determined from the work item.
             
         Returns:
-            Formatted string containing all comments on the work item, including
-            author names, timestamps, and content, organized chronologically and
-            formatted as markdown
+            Formatted string containing all comments on the work item, 
+            including author names, timestamps, and content, organized 
+            chronologically and formatted as markdown
         """
         try:
             wit_client = get_work_item_client()

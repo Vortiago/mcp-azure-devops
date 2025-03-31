@@ -97,8 +97,8 @@ def register_tools(mcp) -> None:
         top: Optional[int] = None
     ) -> str:
         """
-        Retrieves all projects accessible to the authenticated user in the Azure
-        DevOps organization.
+        Retrieves all projects accessible to the authenticated user 
+        in the Azure DevOps organization.
         
         Use this tool when you need to:
         - Get an overview of all available projects
