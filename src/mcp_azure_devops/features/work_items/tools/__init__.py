@@ -6,6 +6,7 @@ from mcp_azure_devops.features.work_items.tools import (
     create,
     query,
     read,
+    templates,
     types,
 )
 
@@ -22,3 +23,4 @@ def register_tools(mcp) -> None:
     comments.register_tools(mcp)
     create.register_tools(mcp)
     types.register_tools(mcp)
+    templates.register_tools(mcp)
