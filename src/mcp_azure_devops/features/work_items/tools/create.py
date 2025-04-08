@@ -4,7 +4,7 @@ Create operations for Azure DevOps work items.
 This module provides MCP tools for creating work items.
 """
 import os
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, Optional
 
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
 from azure.devops.v7_1.work_item_tracking.models import JsonPatchOperation

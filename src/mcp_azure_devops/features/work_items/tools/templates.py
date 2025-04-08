@@ -4,6 +4,7 @@ Work item templates operations for Azure DevOps.
 This module provides MCP tools for retrieving work item templates.
 """
 from typing import Optional
+
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
 
 from mcp_azure_devops.features.work_items.common import (
@@ -28,13 +29,13 @@ def _format_work_item_template(template):
     for attr in ["description", "work_item_type_name", "id"]:
         value = getattr(template, attr, None)
         if value:
-            result.append(f"**{attr.replace('_', ' ').capitalize()}:** {value}")
+            result.append(f"{attr.replace('_', ' ').capitalize()}: {value}")
     
     fields = getattr(template, "fields", None)
     if fields:
         result.append("\n## Default Field Values")
         for field, value in fields.items():
-            result.append(f"- **{field}**: {value}")
+            result.append(f"- {field}: {value}")
     
     return "\n".join(result)
 
@@ -50,8 +51,11 @@ def _create_team_context(team_context_dict):
     )
 
 
-def _get_work_item_templates_impl(team_context: dict, work_item_type: Optional[str],
-                                 wit_client: WorkItemTrackingClient) -> str:
+def _get_work_item_templates_impl(
+    team_context: dict, 
+    work_item_type: Optional[str],
+    wit_client: WorkItemTrackingClient
+) -> str:
     """Implementation of work item templates retrieval."""
     try:
         team_ctx = _create_team_context(team_context)
@@ -60,12 +64,15 @@ def _get_work_item_templates_impl(team_context: dict, work_item_type: Optional[s
         team_display = team_context.get('team') or team_context.get('team_id')
         
         if not templates:
-            scope = f"work item type '{work_item_type}' in " if work_item_type else ""
+            scope = (f"work item type '{work_item_type}' in " 
+                    if work_item_type else "")
             return f"No templates found for {scope}team {team_display}."
         
         # Create header
-        project_display = team_context.get('project') or team_context.get('project_id')
-        header = f"# Work Item Templates for Team: {team_display} (Project: {project_display})"
+        project_display = (team_context.get('project') or 
+                          team_context.get('project_id'))
+        header = (f"# Work Item Templates for Team: {team_display} "
+                 f"(Project: {project_display})")
         if work_item_type:
             header += f" (Filtered by type: {work_item_type})"
         
@@ -73,7 +80,8 @@ def _get_work_item_templates_impl(team_context: dict, work_item_type: Optional[s
         
         # Use list comprehension for table rows
         rows = [
-            f"| {template.name} | {getattr(template, 'work_item_type_name', 'N/A')} | " +
+            f"| {template.name} | " 
+            f"{getattr(template, 'work_item_type_name', 'N/A')} | " +
             f"{getattr(template, 'description', 'N/A')} |"
             for template in templates
         ]
@@ -107,7 +115,10 @@ def register_tools(mcp) -> None:
     """
     
     @mcp.tool()
-    def get_work_item_templates(team_context: dict, work_item_type: Optional[str]) -> str:
+    def get_work_item_templates(
+        team_context: dict, 
+        work_item_type: Optional[str]
+    ) -> str:
         """
         Gets a list of all work item templates for a team.
         
@@ -130,7 +141,8 @@ def register_tools(mcp) -> None:
         """
         try:
             wit_client = get_work_item_client()
-            return _get_work_item_templates_impl(team_context, work_item_type, wit_client)
+            return _get_work_item_templates_impl(
+                team_context, work_item_type, wit_client)
         except AzureDevOpsClientError as e:
             return f"Error: {str(e)}"
     
@@ -153,10 +165,12 @@ def register_tools(mcp) -> None:
             template_id: The ID of the template
             
         Returns:
-            Detailed information about the template including default field values
+            Detailed information about the template including default field 
+            values
         """
         try:
             wit_client = get_work_item_client()
-            return _get_work_item_template_impl(team_context, template_id, wit_client)
+            return _get_work_item_template_impl(
+                team_context, template_id, wit_client)
         except AzureDevOpsClientError as e:
             return f"Error: {str(e)}"

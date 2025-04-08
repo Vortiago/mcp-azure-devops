@@ -1,10 +1,10 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-from azure.devops.v7_1.work_item_tracking.models import TeamContext, WorkItemTemplate
+from azure.devops.v7_1.work_item_tracking.models import WorkItemTemplate
 
 from mcp_azure_devops.features.work_items.tools.templates import (
-    _get_work_item_templates_impl,
     _get_work_item_template_impl,
+    _get_work_item_templates_impl,
 )
 
 

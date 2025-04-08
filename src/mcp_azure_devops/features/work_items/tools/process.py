@@ -3,9 +3,6 @@ Process operations for Azure DevOps.
 
 This module provides MCP tools for retrieving process information.
 """
-from mcp_azure_devops.features.work_items.common import (
-    AzureDevOpsClientError,
-)
 from mcp_azure_devops.utils.azure_client import (
     get_core_client,
     get_work_item_tracking_process_client,
@@ -26,8 +23,10 @@ def _get_project_process_id_impl(project: str) -> str:
     try:
         # Get project details with process information
         core_client = get_core_client()
-        project_details = core_client.get_project(project, include_capabilities=True)
-        process_template = project_details.capabilities.get("processTemplate", {})
+        project_details = core_client.get_project(
+            project, include_capabilities=True)
+        process_template = project_details.capabilities.get(
+            "processTemplate", {})
         
         process_id = process_template.get("templateTypeId")
         process_name = process_template.get("templateName")
@@ -36,12 +35,13 @@ def _get_project_process_id_impl(project: str) -> str:
             return f"Could not determine process ID for project {project}."
         
         result = [f"# Process for Project: {project_details.name}"]
-        result.append(f"**Process Name:** {process_name}")
-        result.append(f"**Process ID:** {process_id}")
+        result.append(f"Process Name: {process_name}")
+        result.append(f"Process ID: {process_id}")
         
         return "\n".join(result)
     except Exception as e:
-        return f"Error retrieving process ID for project '{project}': {str(e)}"
+        return (f"Error retrieving process ID for project '{project}': "
+                f"{str(e)}")
 
 
 def _get_process_details_impl(process_id: str) -> str:
@@ -56,10 +56,11 @@ def _get_process_details_impl(process_id: str) -> str:
         result = [f"# Process: {process.name}"]
         
         if hasattr(process, "description") and process.description:
-            result.append(f"\n**Description:** {process.description}")
+            result.append(f"\nDescription: {process.description}")
         
-        result.append(f"**Reference Name:** {getattr(process, 'reference_name', 'N/A')}")
-        result.append(f"**Type ID:** {getattr(process, 'type_id', 'N/A')}")
+        result.append(
+            f"Reference Name: {getattr(process, 'reference_name', 'N/A')}")
+        result.append(f"Type ID: {getattr(process, 'type_id', 'N/A')}")
         
         # Get process properties like isDefault, isEnabled, etc.
         properties = getattr(process, "properties", None)
@@ -69,7 +70,7 @@ def _get_process_details_impl(process_id: str) -> str:
                 value = getattr(properties, attr, None)
                 if value is not None:
                     attr_name = attr.replace("_", " ").capitalize()
-                    result.append(f"**{attr_name}:** {value}")
+                    result.append(f"{attr_name}: {value}")
         
         # Get work item types for this process
         wit_types = process_client.get_process_work_item_types(process_id)
@@ -87,7 +88,8 @@ def _get_process_details_impl(process_id: str) -> str:
         
         return "\n".join(result)
     except Exception as e:
-        return f"Error retrieving process details for process ID '{process_id}': {str(e)}"
+        return (f"Error retrieving process details for process ID "
+                f"'{process_id}': {str(e)}")
 
 
 def _list_processes_impl() -> str:
@@ -102,13 +104,13 @@ def _list_processes_impl() -> str:
         result = ["# Available Processes"]
         
         headers = ["Name", "ID", "Reference Name", "Description", "Is Default"]
-        rows = [
-            f"| {process.name} | {process.type_id} | " +
-            f"{getattr(process, 'reference_name', 'N/A')} | " +
-            f"{getattr(process, 'description', 'N/A')} | " +
-            f"{'Yes' if getattr(process.properties, 'is_default', False) else 'No'} |"
-            for process in processes
-        ]
+        rows = []
+        for process in processes:
+            is_default = "Yes" if getattr(process.properties, 'is_default', False) else "No"
+            row = (f"| {process.name} | {process.type_id} | " +
+                   f"{getattr(process, 'reference_name', 'N/A')} | " +
+                   f"{getattr(process, 'description', 'N/A')} | {is_default} |")
+            rows.append(row)
         
         result.append(_format_table(headers, rows))
         return "\n".join(result)
@@ -178,7 +180,8 @@ def register_tools(mcp) -> None:
         - Check which process is set as the default
         
         Returns:
-            A formatted table of all processes with names, IDs, and descriptions
+            A formatted table of all processes with names, IDs, and 
+            descriptions
         """
         try:
             return _list_processes_impl()
