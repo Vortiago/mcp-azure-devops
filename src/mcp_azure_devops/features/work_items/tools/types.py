@@ -109,15 +109,14 @@ def _get_work_item_type_fields_impl(project: str, type_name: str,
         if not fields:
             return f"No fields found for work item type '{type_name}' in project {project}."
         
-        headers = ["Name", "Reference Name", "Type", "Required", "Read Only", "Allowed Values"]
+        headers = ["Name", "Reference Name", "Type", "Required", "Read Only"]
         
         # Simple table formatting
         rows = [
             f"| {field.name} | {field.reference_name} | " +
             f"{getattr(field, 'type', 'N/A')} | " +
             f"{'Yes' if getattr(field, 'required', False) else 'No'} | " +
-            f"{'Yes' if getattr(field, 'read_only', False) else 'No'} | " +
-            f"{', '.join(str(v) for v in getattr(field, 'allowed_values', []) or [])} |"
+            f"{'Yes' if getattr(field, 'read_only', False) else 'No'} | "
             for field in fields
         ]
         
