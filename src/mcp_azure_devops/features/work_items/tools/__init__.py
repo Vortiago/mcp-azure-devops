@@ -4,6 +4,7 @@ Work item tools for Azure DevOps.
 from mcp_azure_devops.features.work_items.tools import (
     comments,
     create,
+    process,
     query,
     read,
     templates,
@@ -24,3 +25,4 @@ def register_tools(mcp) -> None:
     create.register_tools(mcp)
     types.register_tools(mcp)
     templates.register_tools(mcp)
+    process.register_tools(mcp)

@@ -9,6 +9,10 @@ from mcp_azure_devops.features.work_items.common import (
     AzureDevOpsClientError,
     get_work_item_client,
 )
+from mcp_azure_devops.utils.azure_client import (
+    get_core_client,
+    get_work_item_tracking_process_client,
+)
 
 
 def _format_table(headers, rows):
@@ -50,33 +54,6 @@ def _format_work_item_type(wit):
     return "\n".join(result)
 
 
-def _format_work_item_field(field):
-    """Format work item field data for display."""
-    result = [f"# Field: {field.name}"]
-    
-    for attr in ["reference_name", "description"]:
-        value = getattr(field, attr, None)
-        if value:
-            result.append(f"**{attr.capitalize()}:** {value}")
-    
-    field_type = getattr(field, "type", None)
-    if field_type:
-        result.append(f"**Type:** {field_type}")
-    
-    for attr in ["read_only", "required"]:
-        value = getattr(field, attr, None)
-        if value is not None:
-            result.append(f"**{attr.capitalize()}:** {value}")
-    
-    allowed_values = getattr(field, "allowed_values", None)
-    if allowed_values:
-        result.append("\n## Allowed Values")
-        for value in allowed_values:
-            result.append(f"- {value}")
-    
-    return "\n".join(result)
-
-
 def _get_work_item_types_impl(project: str, wit_client: WorkItemTrackingClient) -> str:
     """Implementation of work item types retrieval."""
     work_item_types = wit_client.get_work_item_types(project)
@@ -107,25 +84,40 @@ def _get_work_item_type_impl(project: str, type_name: str,
 
 
 def _get_work_item_type_fields_impl(project: str, type_name: str, 
-                                    wit_client: WorkItemTrackingClient) -> str:
-    """Implementation of work item type fields retrieval."""
+                                   wit_client: WorkItemTrackingClient) -> str:
+    """Implementation of work item type fields retrieval using process API."""
     try:
-        fields = wit_client.get_work_item_type_fields_with_references(project, type_name, expand="all")
+        # Get the work item type to get its reference name
+        wit = wit_client.get_work_item_type(project, type_name)
+        if not wit:
+            return f"Work item type '{type_name}' not found in project {project}."
+        
+        wit_ref_name = wit.reference_name
+        
+        # Get project process info
+        core_client = get_core_client()
+        project_details = core_client.get_project(project, include_capabilities=True)
+        process_id = project_details.capabilities.get("processTemplate", {}).get("templateTypeId")
+        
+        if not process_id:
+            return f"Could not determine process ID for project {project}"
+        
+        # Get process client and fields for this work item type
+        process_client = get_work_item_tracking_process_client()
+        fields = process_client.get_all_work_item_type_fields(process_id, wit_ref_name)
         
         if not fields:
             return f"No fields found for work item type '{type_name}' in project {project}."
         
-        headers = ["Name", "Reference Name", "Type", "Required", "Read Only", "Allowed Values", "Default Value", "Help Text"]
+        headers = ["Name", "Reference Name", "Type", "Required", "Read Only", "Allowed Values"]
         
-        # Use list comprehension for table rows
+        # Simple table formatting
         rows = [
             f"| {field.name} | {field.reference_name} | " +
             f"{getattr(field, 'type', 'N/A')} | " +
-            f"{'Yes' if getattr(field, 'always_required', False) else 'No'} | " +
-            f"{'Yes' if getattr(field, 'read_only', False) else 'No'} |" +
-            f"{', '.join(getattr(field, 'allowed_values', []))} | " +
-            f"{getattr(field, 'default_value', 'N/A')} |" +
-            f"{getattr(field, 'help_text', 'N/A')} |"
+            f"{'Yes' if getattr(field, 'required', False) else 'No'} | " +
+            f"{'Yes' if getattr(field, 'read_only', False) else 'No'} | " +
+            f"{', '.join(str(v) for v in getattr(field, 'allowed_values', []) or [])} |"
             for field in fields
         ]
         
@@ -136,15 +128,64 @@ def _get_work_item_type_fields_impl(project: str, type_name: str,
 
 def _get_work_item_type_field_impl(project: str, type_name: str, field_name: str,
                                    wit_client: WorkItemTrackingClient) -> str:
-    """Implementation of work item type field detail retrieval."""
+    """Implementation of work item type field detail retrieval using process API."""
     try:
-        field = wit_client.get_work_item_type_field_with_references(
-            project, type_name, field_name, expand="all")
+        # Get the work item type to get its reference name
+        wit = wit_client.get_work_item_type(project, type_name)
+        if not wit:
+            return f"Work item type '{type_name}' not found in project {project}."
+        
+        wit_ref_name = wit.reference_name
+        
+        # Get project process info
+        core_client = get_core_client()
+        project_details = core_client.get_project(project, include_capabilities=True)
+        process_id = project_details.capabilities.get("processTemplate", {}).get("templateTypeId")
+        
+        if not process_id:
+            return f"Could not determine process ID for project {project}"
+        
+        # Get process client and field details
+        process_client = get_work_item_tracking_process_client()
+        
+        # Determine if field_name is a display name or reference name
+        if not field_name.startswith("System.") and not field_name.startswith("Custom."):
+            # Get all fields to find the reference name
+            all_fields = process_client.get_all_work_item_type_fields(process_id, wit_ref_name)
+            field_ref = next((f.reference_name for f in all_fields if f.name.lower() == field_name.lower()), None)
+            if not field_ref:
+                return f"Field '{field_name}' not found for work item type '{type_name}' in project '{project}'."
+            field_name = field_ref
+        
+        field = process_client.get_work_item_type_field(process_id, wit_ref_name, field_name)
         
         if not field:
             return f"Field '{field_name}' not found for work item type '{type_name}' in project '{project}'."
         
-        return _format_work_item_field(field)
+        # Format field details
+        result = [f"# Field: {field.name}"]
+        result.append(f"**Reference Name:** {field.reference_name}")
+        
+        if hasattr(field, "description") and field.description:
+            result.append(f"**Description:** {field.description}")
+        
+        if hasattr(field, "type"):
+            result.append(f"**Type:** {field.type}")
+        
+        result.append(f"**Required:** {'Yes' if getattr(field, 'required', False) else 'No'}")
+        result.append(f"**Read Only:** {'Yes' if getattr(field, 'read_only', False) else 'No'}")
+        
+        allowed_values = getattr(field, "allowed_values", None)
+        if allowed_values and len(allowed_values) > 0:
+            result.append("\n## Allowed Values")
+            for value in allowed_values:
+                result.append(f"- {value}")
+        
+        default_value = getattr(field, "default_value", None)
+        if default_value is not None:
+            result.append(f"\n**Default Value:** {default_value}")
+        
+        return "\n".join(result)
     except Exception as e:
         return f"Error retrieving field '{field_name}' for work item type '{type_name}' in project '{project}': {str(e)}"
 
