@@ -219,7 +219,8 @@ def test_update_work_item_impl():
     args, kwargs = mock_client.update_work_item.call_args
     document = kwargs.get("document") or args[0]
     assert len(document) == 2  # Two fields in our test
-    assert all(op.op == "replace" for op in document)  # All operations should be replace
+    # All operations should be replace
+    assert all(op.op == "replace" for op in document)
     assert kwargs.get("id") == 123
     assert kwargs.get("project") == "Test Project"
 
@@ -242,8 +243,9 @@ def test_add_link_to_work_item_impl():
     mock_client.update_work_item.return_value = mock_work_item
     
     # Act with patch for organization URL
-    with patch("mcp_azure_devops.features.work_items.tools.create._get_organization_url",
-              return_value="https://dev.azure.com/org"):
+    with patch(
+        "mcp_azure_devops.features.work_items.tools.create._get_organization_url",
+        return_value="https://dev.azure.com/org"):
         result = _add_link_to_work_item_impl(
             source_id=123,
             target_id=456,
@@ -310,7 +312,8 @@ def test_ensure_system_prefix():
     """Test ensuring field names have proper prefix."""
     # Test with already prefixed fields
     assert _ensure_system_prefix("System.Title") == "System.Title"
-    assert _ensure_system_prefix("Microsoft.VSTS.Common.Priority") == "Microsoft.VSTS.Common.Priority"
+    assert (_ensure_system_prefix("Microsoft.VSTS.Common.Priority") == 
+            "Microsoft.VSTS.Common.Priority")
     
     # Test with common short names
     assert _ensure_system_prefix("title") == "System.Title"
@@ -318,8 +321,10 @@ def test_ensure_system_prefix():
     assert _ensure_system_prefix("assignedTo") == "System.AssignedTo"
     assert _ensure_system_prefix("iterationPath") == "System.IterationPath"
     assert _ensure_system_prefix("area_path") == "System.AreaPath"
-    assert _ensure_system_prefix("storyPoints") == "Microsoft.VSTS.Scheduling.StoryPoints"
-    assert _ensure_system_prefix("priority") == "Microsoft.VSTS.Common.Priority"
+    assert (_ensure_system_prefix("storyPoints") == 
+            "Microsoft.VSTS.Scheduling.StoryPoints")
+    assert (_ensure_system_prefix("priority") == 
+            "Microsoft.VSTS.Common.Priority")
     
     # Test with unknown field - should return as is
     assert _ensure_system_prefix("CustomField") == "CustomField"

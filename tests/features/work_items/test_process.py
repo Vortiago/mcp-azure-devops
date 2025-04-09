@@ -30,7 +30,8 @@ def test_get_project_process_id_impl(mock_get_core_client):
     result = _get_project_process_id_impl("Test Project")
     
     # Assert
-    mock_core_client.get_project.assert_called_once_with("Test Project", include_capabilities=True)
+    mock_core_client.get_project.assert_called_once_with(
+        "Test Project", include_capabilities=True)
     
     # Check result formatting
     assert "Process for Project: Test Project" in result
@@ -75,7 +76,8 @@ def test_get_project_process_id_impl_error(mock_get_core_client):
     result = _get_project_process_id_impl("Test Project")
     
     # Assert
-    assert "Error retrieving process ID for project 'Test Project': Test error" in result
+    assert ("Error retrieving process ID for project 'Test Project': " 
+            "Test error" in result)
 
 
 @patch("mcp_azure_devops.features.work_items.tools.process.get_work_item_tracking_process_client")
@@ -110,7 +112,8 @@ def test_get_process_details_impl(mock_get_process_client):
     mock_wit_type2.description = "Represents a task item"
     
     mock_process_client.get_process_by_its_id.return_value = mock_process
-    mock_process_client.get_process_work_item_types.return_value = [mock_wit_type1, mock_wit_type2]
+    mock_process_client.get_process_work_item_types.return_value = [
+        mock_wit_type1, mock_wit_type2]
     
     # Act
     result = _get_process_details_impl("process-id-123")
@@ -165,13 +168,15 @@ def test_get_process_details_impl_error(mock_get_process_client):
     mock_get_process_client.return_value = mock_process_client
     
     # Simulate error
-    mock_process_client.get_process_by_its_id.side_effect = Exception("Test error")
+    mock_process_client.get_process_by_its_id.side_effect = Exception(
+        "Test error")
     
     # Act
     result = _get_process_details_impl("process-id-123")
     
     # Assert
-    assert "Error retrieving process details for process ID 'process-id-123': Test error" in result
+    assert ("Error retrieving process details for process ID 'process-id-123':"
+            " Test error" in result)
 
 
 @patch("mcp_azure_devops.features.work_items.tools.process.get_work_item_tracking_process_client")
@@ -202,7 +207,8 @@ def test_list_processes_impl(mock_get_process_client):
     mock_properties2.is_default = False
     mock_process2.properties = mock_properties2
     
-    mock_process_client.get_list_of_processes.return_value = [mock_process1, mock_process2]
+    mock_process_client.get_list_of_processes.return_value = [
+        mock_process1, mock_process2]
     
     # Act
     result = _list_processes_impl()
@@ -247,7 +253,8 @@ def test_list_processes_impl_error(mock_get_process_client):
     mock_get_process_client.return_value = mock_process_client
     
     # Simulate error
-    mock_process_client.get_list_of_processes.side_effect = Exception("Test error")
+    mock_process_client.get_list_of_processes.side_effect = Exception(
+        "Test error")
     
     # Act
     result = _list_processes_impl()

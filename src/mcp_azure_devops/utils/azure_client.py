@@ -56,7 +56,8 @@ def get_core_client() -> CoreClient:
     
     if not connection:
         raise Exception(
-            "Azure DevOps PAT or organization URL not found in environment variables."
+            "Azure DevOps PAT or organization URL not found in "
+            "environment variables."
         )
     
     core_client = connection.clients.get_core_client()
@@ -81,7 +82,8 @@ def get_work_item_tracking_process_client() -> WorkItemTrackingProcessClient:
     
     if not connection:
         raise Exception(
-            "Azure DevOps PAT or organization URL not found in environment variables."
+            "Azure DevOps PAT or organization URL not found in "
+            "environment variables."
         )
     
     process_client = connection.clients.get_work_item_tracking_process_client()

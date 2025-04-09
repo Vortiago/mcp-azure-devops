@@ -102,7 +102,8 @@ def test_get_work_item_template_impl():
     }
     
     # Act
-    result = _get_work_item_template_impl(team_context, "template1", mock_client)
+    result = _get_work_item_template_impl(
+        team_context, "template1", mock_client)
     
     # Assert
     mock_client.get_template.assert_called_once()
@@ -131,7 +132,8 @@ def test_get_work_item_template_impl_not_found():
     }
     
     # Act
-    result = _get_work_item_template_impl(team_context, "non-existent", mock_client)
+    result = _get_work_item_template_impl(
+        team_context, "non-existent", mock_client)
     
     # Assert
     mock_client.get_template.assert_called_once()
@@ -150,7 +152,8 @@ def test_get_work_item_template_impl_error_handling():
     }
     
     # Act
-    result = _get_work_item_template_impl(team_context, "template1", mock_client)
+    result = _get_work_item_template_impl(
+        team_context, "template1", mock_client)
     
     # Assert
     assert "Error retrieving template 'template1': Test error" in result

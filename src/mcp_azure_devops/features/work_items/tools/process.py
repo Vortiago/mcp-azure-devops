@@ -106,10 +106,13 @@ def _list_processes_impl() -> str:
         headers = ["Name", "ID", "Reference Name", "Description", "Is Default"]
         rows = []
         for process in processes:
-            is_default = "Yes" if getattr(process.properties, 'is_default', False) else "No"
+            is_default = ("Yes" if getattr(process.properties, 
+                                        'is_default', False) 
+                          else "No")
             row = (f"| {process.name} | {process.type_id} | " +
                    f"{getattr(process, 'reference_name', 'N/A')} | " +
-                   f"{getattr(process, 'description', 'N/A')} | {is_default} |")
+                   f"{getattr(process, 'description', 'N/A')} | " +
+                   f"{is_default} |")
             rows.append(row)
         
         result.append(_format_table(headers, rows))

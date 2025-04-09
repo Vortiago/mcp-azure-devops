@@ -30,7 +30,8 @@ def test_get_work_item_types_impl():
     mock_task_type.color = "00FF00"
     mock_task_type.icon = "task"
     
-    mock_client.get_work_item_types.return_value = [mock_bug_type, mock_task_type]
+    mock_client.get_work_item_types.return_value = [
+        mock_bug_type, mock_task_type]
     
     # Act
     result = _get_work_item_types_impl("TestProject", mock_client)
@@ -102,7 +103,8 @@ def test_get_work_item_type_impl():
     result = _get_work_item_type_impl("TestProject", "Bug", mock_client)
     
     # Assert
-    mock_client.get_work_item_type.assert_called_once_with("TestProject", "Bug")
+    mock_client.get_work_item_type.assert_called_once_with(
+        "TestProject", "Bug")
     
     # Check result content
     assert "Work Item Type: Bug" in result or "# Work Item Type: Bug" in result
@@ -130,16 +132,20 @@ def test_get_work_item_type_impl_not_found():
     mock_client.get_work_item_type.return_value = None
     
     # Act
-    result = _get_work_item_type_impl("TestProject", "NonExistentType", mock_client)
+    result = _get_work_item_type_impl(
+        "TestProject", "NonExistentType", mock_client)
     
     # Assert
-    mock_client.get_work_item_type.assert_called_once_with("TestProject", "NonExistentType")
-    assert "Work item type 'NonExistentType' not found in project TestProject" in result
+    mock_client.get_work_item_type.assert_called_once_with(
+        "TestProject", "NonExistentType")
+    assert ("Work item type 'NonExistentType' not found in project " 
+            "TestProject" in result)
 
 
 @patch("mcp_azure_devops.features.work_items.tools.types.get_core_client")
 @patch("mcp_azure_devops.features.work_items.tools.types.get_work_item_tracking_process_client")
-def test_get_work_item_type_fields_impl(mock_get_process_client, mock_get_core_client):
+def test_get_work_item_type_fields_impl(
+        mock_get_process_client, mock_get_core_client):
     """Test retrieving all fields for a work item type."""
     # Arrange
     mock_wit_client = MagicMock()
@@ -190,12 +196,16 @@ def test_get_work_item_type_fields_impl(mock_get_process_client, mock_get_core_c
     mock_get_process_client.return_value = mock_process_client
     
     # Act
-    result = _get_work_item_type_fields_impl("TestProject", "Bug", mock_wit_client)
+    result = _get_work_item_type_fields_impl(
+        "TestProject", "Bug", mock_wit_client)
     
     # Assert
-    mock_wit_client.get_work_item_type.assert_called_once_with("TestProject", "Bug")
-    mock_core_client.get_project.assert_called_once_with("TestProject", include_capabilities=True)
-    mock_process_client.get_all_work_item_type_fields.assert_called_once_with("process-id-123", "System.Bug")
+    mock_wit_client.get_work_item_type.assert_called_once_with(
+        "TestProject", "Bug")
+    mock_core_client.get_project.assert_called_once_with(
+        "TestProject", include_capabilities=True)
+    mock_process_client.get_all_work_item_type_fields.assert_called_once_with(
+        "process-id-123", "System.Bug")
     
     # Check result content
     assert "Fields for Work Item Type: Bug" in result
@@ -214,7 +224,8 @@ def test_get_work_item_type_fields_impl(mock_get_process_client, mock_get_core_c
 
 @patch("mcp_azure_devops.features.work_items.tools.types.get_core_client")
 @patch("mcp_azure_devops.features.work_items.tools.types.get_work_item_tracking_process_client")
-def test_get_work_item_type_fields_impl_no_fields(mock_get_process_client, mock_get_core_client):
+def test_get_work_item_type_fields_impl_no_fields(
+        mock_get_process_client, mock_get_core_client):
     """Test retrieving fields when none exist."""
     # Arrange
     mock_wit_client = MagicMock()
@@ -242,15 +253,18 @@ def test_get_work_item_type_fields_impl_no_fields(mock_get_process_client, mock_
     mock_get_process_client.return_value = mock_process_client
     
     # Act
-    result = _get_work_item_type_fields_impl("TestProject", "Bug", mock_wit_client)
+    result = _get_work_item_type_fields_impl(
+        "TestProject", "Bug", mock_wit_client)
     
     # Assert
-    assert "No fields found for work item type 'Bug' in project TestProject" in result
+    assert ("No fields found for work item type 'Bug' in project TestProject" 
+            in result)
 
 
 @patch("mcp_azure_devops.features.work_items.tools.types.get_core_client")
 @patch("mcp_azure_devops.features.work_items.tools.types.get_work_item_tracking_process_client")
-def test_get_work_item_type_field_impl(mock_get_process_client, mock_get_core_client):
+def test_get_work_item_type_field_impl(
+        mock_get_process_client, mock_get_core_client):
     """Test retrieving a specific field for a work item type."""
     # Arrange
     mock_wit_client = MagicMock()
@@ -283,18 +297,22 @@ def test_get_work_item_type_field_impl(mock_get_process_client, mock_get_core_cl
     mock_priority_field.allowed_values = ["1", "2", "3", "4"]
     mock_priority_field.default_value = "3"
     
-    mock_process_client.get_work_item_type_field.return_value = mock_priority_field
+    mock_process_client.get_work_item_type_field.return_value = (
+        mock_priority_field)
     mock_get_process_client.return_value = mock_process_client
     
     # Use reference name directly for this test
     field_name = "Microsoft.VSTS.Common.Priority"
     
     # Act
-    result = _get_work_item_type_field_impl("TestProject", "Bug", field_name, mock_wit_client)
+    result = _get_work_item_type_field_impl(
+        "TestProject", "Bug", field_name, mock_wit_client)
     
     # Assert
-    mock_wit_client.get_work_item_type.assert_called_once_with("TestProject", "Bug")
-    mock_core_client.get_project.assert_called_once_with("TestProject", include_capabilities=True)
+    mock_wit_client.get_work_item_type.assert_called_once_with(
+        "TestProject", "Bug")
+    mock_core_client.get_project.assert_called_once_with(
+        "TestProject", include_capabilities=True)
     # Verify the mock method was called in some manner
     assert mock_process_client.get_work_item_type_field.call_count > 0
     
@@ -314,7 +332,8 @@ def test_get_work_item_type_field_impl(mock_get_process_client, mock_get_core_cl
 
 @patch("mcp_azure_devops.features.work_items.tools.types.get_core_client")
 @patch("mcp_azure_devops.features.work_items.tools.types.get_work_item_tracking_process_client")
-def test_get_work_item_type_field_impl_display_name(mock_get_process_client, mock_get_core_client):
+def test_get_work_item_type_field_impl_display_name(
+        mock_get_process_client, mock_get_core_client):
     """Test retrieving a field by display name instead of reference name."""
     # Arrange
     mock_wit_client = MagicMock()
@@ -337,12 +356,14 @@ def test_get_work_item_type_field_impl_display_name(mock_get_process_client, moc
     mock_core_client.get_project.return_value = mock_project
     mock_get_core_client.return_value = mock_core_client
     
-    # Setup mock for get_all_work_item_type_fields (used to find reference name)
+    # Setup mock for get_all_work_item_type_fields 
+    # (used to find reference name)
     mock_priority_field = MagicMock()
     mock_priority_field.name = "Priority"
     mock_priority_field.reference_name = "Microsoft.VSTS.Common.Priority"
     
-    mock_process_client.get_all_work_item_type_fields.return_value = [mock_priority_field]
+    mock_process_client.get_all_work_item_type_fields.return_value = [
+        mock_priority_field]
     
     # Setup mock for get_work_item_type_field
     mock_field_detail = MagicMock()
@@ -353,22 +374,27 @@ def test_get_work_item_type_field_impl_display_name(mock_get_process_client, moc
     mock_field_detail.read_only = False
     mock_field_detail.allowed_values = ["1", "2", "3", "4"]
     
-    mock_process_client.get_work_item_type_field.return_value = mock_field_detail
+    mock_process_client.get_work_item_type_field.return_value = (
+        mock_field_detail)
     mock_get_process_client.return_value = mock_process_client
     
     # Use display name for this test
     field_name = "Priority"
     
     # Act
-    result = _get_work_item_type_field_impl("TestProject", "Bug", field_name, mock_wit_client)
+    result = _get_work_item_type_field_impl(
+        "TestProject", "Bug", field_name, mock_wit_client)
     
     # Assert
     # First verify it looked up all fields to find reference name
-    mock_process_client.get_all_work_item_type_fields.assert_called_once_with("process-id-123", "System.Bug")
+    mock_process_client.get_all_work_item_type_fields.assert_called_once_with(
+        "process-id-123", "System.Bug")
     
     # Then verify it called get_work_item_type_field with the reference name
-    # Handle the different ways the implementation might call the process client
-    # The test might be expecting a specific method call, but the implementation might be different
+    # Handle the different ways the implementation might call 
+    # the process client
+    # The test might be expecting a specific method call, 
+    # but the implementation might be different
     assert mock_process_client.get_work_item_type_field.call_count > 0
     mock_process_client.get_work_item_type_field.assert_any_call(
         "process-id-123", "System.Bug", "Microsoft.VSTS.Common.Priority"
@@ -381,7 +407,8 @@ def test_get_work_item_type_field_impl_display_name(mock_get_process_client, moc
 
 @patch("mcp_azure_devops.features.work_items.tools.types.get_core_client")
 @patch("mcp_azure_devops.features.work_items.tools.types.get_work_item_tracking_process_client")
-def test_get_work_item_type_field_impl_field_not_found(mock_get_process_client, mock_get_core_client):
+def test_get_work_item_type_field_impl_field_not_found(
+        mock_get_process_client, mock_get_core_client):
     """Test retrieving a field that doesn't exist."""
     # Arrange
     mock_wit_client = MagicMock()
@@ -412,7 +439,9 @@ def test_get_work_item_type_field_impl_field_not_found(mock_get_process_client, 
     field_name = "NonExistentField"
     
     # Act
-    result = _get_work_item_type_field_impl("TestProject", "Bug", field_name, mock_wit_client)
+    result = _get_work_item_type_field_impl(
+        "TestProject", "Bug", field_name, mock_wit_client)
     
     # Assert
-    assert f"Field '{field_name}' not found for work item type 'Bug' in project 'TestProject'" in result
+    assert (f"Field '{field_name}' not found for work item type " 
+            f"'Bug' in project 'TestProject'" in result)

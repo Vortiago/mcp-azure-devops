@@ -21,11 +21,13 @@ def _format_field_value(field_value) -> str:
     elif isinstance(field_value, dict):
         # Handle dictionary fields like people references
         if 'displayName' in field_value:
-            return f"{field_value.get('displayName')} ({field_value.get('uniqueName', '')})"
+            return (f"{field_value.get('displayName')} "
+                  f"({field_value.get('uniqueName', '')})")
         else:
             # For other dictionaries, format as key-value pairs
             return ", ".join([f"{k}: {v}" for k, v in field_value.items()])
-    elif hasattr(field_value, 'display_name') and hasattr(field_value, 'unique_name'):
+    elif (hasattr(field_value, 'display_name') and 
+          hasattr(field_value, 'unique_name')):
         # Handle objects with display_name and unique_name
         return f"{field_value.display_name} ({field_value.unique_name})"
     elif hasattr(field_value, 'display_name'):

@@ -60,7 +60,8 @@ def test_query_work_items_impl_with_results():
     
     result = _query_work_items_impl("SELECT * FROM WorkItems", 10, mock_client)
     
-    # Check that the result contains the expected formatting per format_work_item
+    # Check that the result contains the expected formatting 
+    # per format_work_item
     assert "# Work Item 123" in result
     assert "- **System.WorkItemType**: Bug" in result
     assert "- **System.Title**: Test Bug" in result

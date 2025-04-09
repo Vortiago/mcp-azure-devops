@@ -215,7 +215,8 @@ def _prepare_standard_fields(
     tags: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Prepare fields dictionary with standard fields for work item creation/update.
+    Prepare fields dictionary with standard fields for work item 
+    creation/update.
     
     Args:
         title: The title of the work item
@@ -344,7 +345,8 @@ def register_tools(mcp) -> None:
             project: The project name or ID where the work item will be created
             work_item_type: Type of work item (e.g., "User Story", "Bug", 
                 "Task")
-            fields: Optional dictionary of additional field name/value pairs to set
+            fields: Optional dictionary of additional field name/value pairs 
+                to set
             description: Optional description of the work item
             state: Optional initial state for the work item
             assigned_to: Optional user email to assign the work item to
