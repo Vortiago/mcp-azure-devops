@@ -111,9 +111,10 @@ def test_create_work_item_impl():
     
     # Assert
     mock_client.create_work_item.assert_called_once()
-    assert "Work Item 123: Test Bug" in result
-    assert "Type: Bug" in result
-    assert "State: New" in result
+    assert "# Work Item 123" in result
+    assert "**System.WorkItemType**: Bug" in result
+    assert "**System.Title**: Test Bug" in result
+    assert "**System.State**: New" in result
     
     # Verify document passed to create_work_item
     args, kwargs = mock_client.create_work_item.call_args
@@ -172,7 +173,8 @@ def test_create_work_item_impl_with_parent(mock_get_org_url):
     assert document[0].value["rel"] == "System.LinkTypes.Hierarchy-Reverse"
     
     # Check result formatting
-    assert "Work Item 123: Test Bug" in result
+    assert "# Work Item 123" in result
+    assert "**System.Title**: Test Bug" in result
 
 
 def test_update_work_item_impl():
@@ -208,9 +210,10 @@ def test_update_work_item_impl():
     
     # Assert
     mock_client.update_work_item.assert_called_once()
-    assert "Work Item 123: Updated Bug" in result
-    assert "Type: Bug" in result
-    assert "State: Active" in result
+    assert "# Work Item 123" in result
+    assert "**System.Title**: Updated Bug" in result
+    assert "**System.WorkItemType**: Bug" in result
+    assert "**System.State**: Active" in result
     
     # Verify document passed to update_work_item
     args, kwargs = mock_client.update_work_item.call_args
@@ -260,7 +263,9 @@ def test_add_link_to_work_item_impl():
     assert document[0].value["url"] == "https://dev.azure.com/org/_apis/wit/workItems/456"
     
     # Check result formatting
-    assert "Work Item 123: Test Bug" in result
+    assert "# Work Item 123" in result
+    assert "**System.Title**: Test Bug" in result
+    assert "**System.State**: Active" in result
 
 
 def test_prepare_standard_fields():
