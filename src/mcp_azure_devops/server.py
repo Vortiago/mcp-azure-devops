@@ -8,12 +8,14 @@ import argparse
 from mcp.server.fastmcp import FastMCP
 
 from mcp_azure_devops.features import register_all
+from mcp_azure_devops.utils import register_all_prompts
 
 # Create a FastMCP server instance with a name
 mcp = FastMCP("Azure DevOps")
 
 # Register all features
 register_all(mcp)
+register_all_prompts(mcp)
 
 def main():
     """Entry point for the command-line script."""
