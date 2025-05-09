@@ -14,6 +14,7 @@ from mcp_azure_devops.features.work_items.common import (
     get_work_item_client,
 )
 from mcp_azure_devops.features.work_items.formatting import format_work_item
+from mcp_azure_devops.features.work_items.tools.utils import sanitize_description_html
 
 
 def _build_field_document(fields: Dict[str, Any], 
@@ -86,6 +87,7 @@ def _create_work_item_impl(
     work_item_type: str,
     wit_client: WorkItemTrackingClient,
     parent_id: Optional[int] = None,
+    acceptance_criteria: Optional[str] = None,
 ) -> str:
     """
     Implementation of creating a work item.
@@ -96,6 +98,7 @@ def _create_work_item_impl(
         work_item_type: Type of work item (e.g., "User Story", "Bug", "Task")
         wit_client: Work item tracking client
         parent_id: Optional ID of parent work item for hierarchy
+        acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
         
     Returns:
         Formatted string containing the created work item details
@@ -108,6 +111,22 @@ def _create_work_item_impl(
         project=project,
         type=work_item_type
     )
+    
+    # If acceptance criteria is provided, add it in a separate update
+    if acceptance_criteria:
+        ac_html = sanitize_description_html(acceptance_criteria)
+        ac_document = [{
+            "op": "add",
+            "path": "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
+            "value": ac_html
+        }]
+        
+        # Update the work item to add acceptance criteria
+        new_work_item = wit_client.update_work_item(
+            document=ac_document,
+            id=new_work_item.id,
+            project=project
+        )
     
     # If parent_id is provided, establish parent-child relationship
     if parent_id:
@@ -142,6 +161,7 @@ def _update_work_item_impl(
     fields: Dict[str, Any],
     wit_client: WorkItemTrackingClient,
     project: Optional[str] = None,
+    acceptance_criteria: Optional[str] = None
 ) -> str:
     """
     Implementation of updating a work item.
@@ -151,11 +171,21 @@ def _update_work_item_impl(
         fields: Dictionary of field name/value pairs to update
         wit_client: Work item tracking client
         project: Optional project name or ID
+        acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
         
     Returns:
         Formatted string containing the updated work item details
     """
     document = _build_field_document(fields, "replace")
+    
+    # If acceptance criteria is provided, add it to the document
+    if acceptance_criteria:
+        ac_html = sanitize_description_html(acceptance_criteria)
+        document.append({
+            "op": "replace",
+            "path": "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
+            "value": ac_html
+        })
     
     # Update the work item
     updated_work_item = wit_client.update_work_item(
@@ -238,6 +268,7 @@ def _prepare_standard_fields(
         fields["System.Title"] = title
     
     if description:
+        # Process description for HTML conversion
         fields["System.Description"] = description
     
     if state:
@@ -326,6 +357,7 @@ def register_tools(mcp) -> None:
         story_points: Optional[float] = None,
         priority: Optional[int] = None,
         tags: Optional[str] = None,
+        acceptance_criteria: Optional[str] = None,
     ) -> str:
         """
         Creates a new work item in Azure DevOps.
@@ -351,11 +383,12 @@ def register_tools(mcp) -> None:
             state: Optional initial state for the work item
             assigned_to: Optional user email to assign the work item to
             parent_id: Optional ID of parent work item for hierarchy
-            iteration_path: Optional iteration path for the work item
+            iteration_path: Optional iteration path for the work item            
             area_path: Optional area path for the work item
             story_points: Optional story points value
             priority: Optional priority value
             tags: Optional tags as comma-separated string
+            acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
             
         Returns:
             Formatted string containing the created work item details including
@@ -364,6 +397,10 @@ def register_tools(mcp) -> None:
         """
         try:
             wit_client = get_work_item_client()
+            
+            # Process description if provided
+            if description:
+                description = sanitize_description_html(description)
             
             # Start with standard fields
             all_fields = _prepare_standard_fields(
@@ -385,7 +422,8 @@ def register_tools(mcp) -> None:
                 project=project,
                 work_item_type=work_item_type,
                 wit_client=wit_client,
-                parent_id=parent_id
+                parent_id=parent_id,
+                acceptance_criteria=acceptance_criteria
             )
             
         except AzureDevOpsClientError as e:
@@ -408,6 +446,7 @@ def register_tools(mcp) -> None:
         story_points: Optional[float] = None,
         priority: Optional[int] = None,
         tags: Optional[str] = None,
+        acceptance_criteria: Optional[str] = None
     ) -> str:
         """
         Modifies an existing work item's fields and properties.
@@ -438,6 +477,7 @@ def register_tools(mcp) -> None:
             story_points: Optional new story points value
             priority: Optional new priority value
             tags: Optional new tags as comma-separated string
+            acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
             
         Returns:
             Formatted string containing the updated work item details with
@@ -445,6 +485,10 @@ def register_tools(mcp) -> None:
         """
         try:
             wit_client = get_work_item_client()
+            
+            # Process description if provided
+            if description:
+                description = sanitize_description_html(description)
             
             # Start with standard fields
             all_fields = _prepare_standard_fields(
@@ -458,14 +502,15 @@ def register_tools(mcp) -> None:
                     field_name = _ensure_system_prefix(field_name)
                     all_fields[field_name] = field_value
                 
-            if not all_fields:
+            if not all_fields and not acceptance_criteria:
                 return "Error: At least one field must be specified for update"
             
             return _update_work_item_impl(
                 id=id,
                 fields=all_fields,
                 wit_client=wit_client,
-                project=project
+                project=project,
+                acceptance_criteria=acceptance_criteria
             )
             
         except AzureDevOpsClientError as e:

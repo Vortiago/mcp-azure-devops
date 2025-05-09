@@ -12,6 +12,7 @@ from mcp_azure_devops.features.work_items.common import (
     AzureDevOpsClientError,
     get_work_item_client,
 )
+from mcp_azure_devops.features.work_items.tools.utils import sanitize_description_html
 
 
 def _format_comment(comment) -> str:
@@ -130,8 +131,11 @@ def _add_work_item_comment_impl(
         if not project:
             return f"Error retrieving work item {item_id} to determine project"
     
+    # Process comment content for HTML conversion
+    text_html = sanitize_description_html(text)
+    
     # Create comment request
-    comment_request = CommentCreate(text=text)
+    comment_request = CommentCreate(text=text_html)
     
     # Add the comment
     new_comment = wit_client.add_comment(
