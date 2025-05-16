@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # MCP Azure DevOps Server Guide
 
 This guide helps AI assistants implement and modify the MCP Azure DevOps server codebase effectively.
@@ -37,7 +41,56 @@ mcp-azure-devops/
 └── uv.lock                    # Package dependency locks
 ```
 
-## 3. Core Concepts
+## 3. Development Commands
+
+### Setup and Installation
+```bash
+# Install in development mode with all dev dependencies
+uv pip install -e ".[dev]"
+
+# Create a virtual environment (alternative)
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+### Running the Server
+```bash
+# Run the server in development mode with inspector
+mcp dev src/mcp_azure_devops/server.py
+
+# Install in Claude Desktop
+mcp install src/mcp_azure_devops/server.py --name "Azure DevOps Assistant"
+
+# Run via the start script (loads env vars)
+./start_server.sh
+```
+
+### Testing
+```bash
+# Run all tests
+uv run pytest tests/
+
+# Run a specific test file
+uv run pytest tests/features/work_items/test_tools.py
+
+# Run a specific test
+uv run pytest tests/features/work_items/test_tools.py::test_query_work_items_impl_with_results
+```
+
+### Code Quality
+```bash
+# Format code with ruff
+uv run ruff format .
+
+# Run linter
+uv run ruff check .
+
+# Run type checking
+uv run pyright
+```
+
+## 4. Core Concepts
 
 ### Azure DevOps & MCP Integration
 
@@ -60,7 +113,7 @@ The project requires these environment variables:
 - `AZURE_DEVOPS_PAT`: Personal Access Token with appropriate permissions
 - `AZURE_DEVOPS_ORGANIZATION_URL`: The full URL to your Azure DevOps organization
 
-## 4. Implementation Guidelines
+## 5. Implementation Guidelines
 
 ### Feature Structure
 
@@ -146,7 +199,7 @@ except Exception as e:
 
 For specific errors, create custom exception classes in the feature's `common.py` file.
 
-## 5. Common Code Patterns
+## 6. Common Code Patterns
 
 ### Client Initialization
 
@@ -176,8 +229,57 @@ def format_result(data):
     return "\n".join(formatted_info)
 ```
 
+## 7. Testing Guidelines
 
-## 6. Adding New Features
+### Mocking Azure DevOps API
+
+The codebase uses unittest.mock to mock Azure DevOps API responses:
+
+```python
+from unittest.mock import MagicMock
+from azure.devops.v7_1.work_item_tracking.models import WorkItem
+
+# Create mock client
+mock_client = MagicMock()
+
+# Create mock response objects
+mock_work_item = MagicMock(spec=WorkItem)
+mock_work_item.id = 123
+mock_work_item.fields = {
+    "System.WorkItemType": "Bug",
+    "System.Title": "Test Bug"
+}
+
+# Set return value for client method
+mock_client.get_work_item.return_value = mock_work_item
+
+# Test implementation function
+result = _get_work_item_impl(123, mock_client)
+
+# Verify results
+assert "# Work Item 123" in result
+assert "- **System.WorkItemType**: Bug" in result
+```
+
+### Test Function Pattern
+
+Tests should cover both success and error cases:
+
+```python
+def test_get_data_success():
+    """Test successful data retrieval."""
+    # Setup mocks
+    # Execute implementation
+    # Assert results
+
+def test_get_data_error():
+    """Test error handling in data retrieval."""
+    # Setup mock to raise exception
+    # Execute implementation
+    # Assert error message in result
+```
+
+## 8. Adding New Features
 
 To add a new feature:
 
@@ -187,7 +289,7 @@ To add a new feature:
 4. Register the feature with the server by updating `features/__init__.py`
 5. Write tests for the new feature in the `tests/` directory
 
-## 7. Technical Requirements
+## 9. Technical Requirements
 
 ### Code Style
 - PEP 8 conventions
@@ -196,85 +298,3 @@ To add a new feature:
 - Small, focused functions
 - Line length: 79 characters
 - Import sorting: standard library → third-party → local
-
-### Development Tools
-- Install: `uv pip install -e ".[dev]"`
-- Run server: `mcp dev src/mcp_azure_devops/server.py`
-- Run tests: `uv run pytest tests/`
-- Format: `uv run ruff format .`
-- Type check: `uv run pyright`
-
-### Testing
-- Write tests for all new functionality
-- Test both successful and error cases
-- Mock Azure DevOps API responses for deterministic testing
-- Place tests in the `tests/` directory with corresponding structure
-
-## 8. Examples
-
-### Example: Creating a New Tool
-
-```python
-# In src/mcp_azure_devops/features/repositories/tools.py
-
-def _list_repositories_impl(git_client, project):
-    """Implementation of listing repositories."""
-    repos = git_client.get_repositories(project=project)
-    
-    if not repos:
-        return f"No repositories found in project {project}."
-    
-    formatted_repos = []
-    for repo in repos:
-        formatted_repos.append(_format_repository(repo))
-    
-    return "\n\n".join(formatted_repos)
-
-def register_tools(mcp):
-    """Register repository tools with the MCP server."""
-    
-    @mcp.tool()
-    def list_repositories(project):
-        """
-        Lists all Git repositories in a project.
-        
-        Use this tool when you need to:
-        - View all repositories in a project
-        - Find a specific repository by name
-        - Get repository IDs for use in other operations
-        
-        Args:
-            project: Project name or ID
-            
-        Returns:
-            Formatted string listing all repositories with names, IDs, and URLs
-        """
-        try:
-            git_client = get_git_client()
-            return _list_repositories_impl(git_client, project)
-        except AzureDevOpsClientError as e:
-            return f"Error: {str(e)}"
-```
-
-### Example: Registering a New Feature
-
-```python
-# In src/mcp_azure_devops/features/repositories/__init__.py
-
-from mcp_azure_devops.features.repositories import tools
-
-def register(mcp):
-    """Register repository components with the MCP server."""
-    tools.register_tools(mcp)
-
-# In src/mcp_azure_devops/features/__init__.py
-
-from mcp_azure_devops.features import projects, teams, work_items, repositories
-
-def register_all(mcp):
-    """Register all features with the MCP server."""
-    work_items.register(mcp)
-    projects.register(mcp)
-    teams.register(mcp)
-    repositories.register(mcp)  # Add the new feature
-```

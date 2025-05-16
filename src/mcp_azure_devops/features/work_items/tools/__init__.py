@@ -1,5 +1,7 @@
 """
 Work item tools for Azure DevOps.
+
+This module provides MCP tools to interact with work items.
 """
 from mcp_azure_devops.features.work_items.tools import (
     comments,
@@ -9,6 +11,7 @@ from mcp_azure_devops.features.work_items.tools import (
     read,
     templates,
     types,
+    attachments,
 )
 
 
@@ -26,3 +29,4 @@ def register_tools(mcp) -> None:
     types.register_tools(mcp)
     templates.register_tools(mcp)
     process.register_tools(mcp)
+    attachments.register_tools(mcp)
