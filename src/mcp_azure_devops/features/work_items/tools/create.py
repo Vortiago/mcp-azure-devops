@@ -14,6 +14,7 @@ from mcp_azure_devops.features.work_items.common import (
     get_work_item_client,
 )
 from mcp_azure_devops.features.work_items.formatting import format_work_item
+from mcp_azure_devops.features.work_items.tools.utils import sanitize_description_html
 
 
 def _build_field_document(fields: Dict[str, Any], 
@@ -86,6 +87,8 @@ def _create_work_item_impl(
     work_item_type: str,
     wit_client: WorkItemTrackingClient,
     parent_id: Optional[int] = None,
+    acceptance_criteria: Optional[str] = None,
+    related_ids: Optional[list[int]] = None
 ) -> str:
     """
     Implementation of creating a work item.
@@ -96,6 +99,7 @@ def _create_work_item_impl(
         work_item_type: Type of work item (e.g., "User Story", "Bug", "Task")
         wit_client: Work item tracking client
         parent_id: Optional ID of parent work item for hierarchy
+        acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
         
     Returns:
         Formatted string containing the created work item details
@@ -109,31 +113,53 @@ def _create_work_item_impl(
         type=work_item_type
     )
     
+    # If acceptance criteria is provided, add it in a separate update
+    if acceptance_criteria:
+        ac_html = sanitize_description_html(acceptance_criteria)
+        ac_document = [{
+            "op": "add",
+            "path": "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
+            "value": ac_html
+        }]
+        
+        # Update the work item to add acceptance criteria
+        new_work_item = wit_client.update_work_item(
+            document=ac_document,
+            id=new_work_item.id,
+            project=project
+        )
+    
     # If parent_id is provided, establish parent-child relationship
-    if parent_id:
-        try:
-            # Get organization URL from environment
-            org_url = _get_organization_url()
-            
-            # Create parent-child relationship
+    try:
+        org_url = _get_organization_url()
+        # Parent link
+        if parent_id:
             link_document = _build_link_document(
                 target_id=parent_id,
                 link_type="System.LinkTypes.Hierarchy-Reverse",
                 org_url=org_url
             )
-            
-            # Update the work item to add the parent link
             new_work_item = wit_client.update_work_item(
                 document=link_document,
                 id=new_work_item.id,
                 project=project
             )
-        except Exception as e:
-            return (f"Work item created successfully, but failed to establish "
-                   f"parent-child relationship: {str(e)}\n\n"
-                   f"{format_work_item(new_work_item)}")
-    
-    # Format and return the created work item
+        # Related links
+        if related_ids:
+            for related_id in related_ids:
+                related_document = _build_link_document(
+                    target_id=related_id,
+                    link_type="System.LinkTypes.Related",
+                    org_url=org_url
+                )
+                new_work_item = wit_client.update_work_item(
+                    document=related_document,
+                    id=new_work_item.id,
+                    project=project
+                )
+    except Exception as e:
+        return (f"Work item created successfully, but failed to establish parent/related links: {str(e)}\n\n"
+                f"{format_work_item(new_work_item)}")
     return format_work_item(new_work_item)
 
 
@@ -142,6 +168,9 @@ def _update_work_item_impl(
     fields: Dict[str, Any],
     wit_client: WorkItemTrackingClient,
     project: Optional[str] = None,
+    acceptance_criteria: Optional[str] = None,
+    related_ids: Optional[list[int]] = None,
+    remove_related_ids: Optional[list[int]] = None
 ) -> str:
     """
     Implementation of updating a work item.
@@ -151,20 +180,71 @@ def _update_work_item_impl(
         fields: Dictionary of field name/value pairs to update
         wit_client: Work item tracking client
         project: Optional project name or ID
+        acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
         
     Returns:
         Formatted string containing the updated work item details
     """
     document = _build_field_document(fields, "replace")
     
-    # Update the work item
-    updated_work_item = wit_client.update_work_item(
-        document=document,
-        id=id,
-        project=project
-    )
+    # If acceptance criteria is provided, add it to the document
+    if acceptance_criteria:
+        ac_html = sanitize_description_html(acceptance_criteria)
+        document.append({
+            "op": "replace",
+            "path": "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
+            "value": ac_html
+        })
     
+    # Update the work item only if there are fields to update
+    if document:
+        updated_work_item = wit_client.update_work_item(
+            document=document,
+            id=id,
+            project=project
+        )
+    else:
+        # If only relationships are being modified, we need to get the work item first
+        updated_work_item = wit_client.get_work_item(id, project=project)
+
+    # Handle related links (add)
+    if related_ids:
+        org_url = _get_organization_url()
+        for related_id in related_ids:
+            related_document = _build_link_document(
+                target_id=related_id,
+                link_type="System.LinkTypes.Related",
+                org_url=org_url
+            )
+            updated_work_item = wit_client.update_work_item(
+                document=related_document,
+                id=id,
+                project=project
+            )
+    # Handle related links (remove)
+    if remove_related_ids:
+        org_url = _get_organization_url()
+        for related_id in remove_related_ids:
+            remove_document = [
+                JsonPatchOperation(
+                    op="remove",
+                    path=f"/relations/{_find_relation_index(updated_work_item, related_id, org_url)}"
+                )
+            ]
+            updated_work_item = wit_client.update_work_item(
+                document=remove_document,
+                id=id,
+                project=project
+            )
     return format_work_item(updated_work_item)
+
+# Helper to find the index of a related link
+def _find_relation_index(work_item, related_id, org_url):
+    url = f"{org_url}/_apis/wit/workItems/{related_id}"
+    for idx, rel in enumerate(getattr(work_item, 'relations', []) or []):
+        if rel.rel == "System.LinkTypes.Related" and rel.url == url:
+            return idx
+    raise Exception(f"Related link to work item {related_id} not found.")
 
 
 def _add_link_to_work_item_impl(
@@ -238,6 +318,7 @@ def _prepare_standard_fields(
         fields["System.Title"] = title
     
     if description:
+        # Process description for HTML conversion
         fields["System.Description"] = description
     
     if state:
@@ -321,11 +402,13 @@ def register_tools(mcp) -> None:
         state: Optional[str] = None,
         assigned_to: Optional[str] = None,
         parent_id: Optional[int] = None,
+        related_ids: Optional[list[int]] = None,
         iteration_path: Optional[str] = None,
         area_path: Optional[str] = None,
         story_points: Optional[float] = None,
         priority: Optional[int] = None,
         tags: Optional[str] = None,
+        acceptance_criteria: Optional[str] = None,
     ) -> str:
         """
         Creates a new work item in Azure DevOps.
@@ -351,11 +434,12 @@ def register_tools(mcp) -> None:
             state: Optional initial state for the work item
             assigned_to: Optional user email to assign the work item to
             parent_id: Optional ID of parent work item for hierarchy
-            iteration_path: Optional iteration path for the work item
+            iteration_path: Optional iteration path for the work item            
             area_path: Optional area path for the work item
             story_points: Optional story points value
             priority: Optional priority value
             tags: Optional tags as comma-separated string
+            acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
             
         Returns:
             Formatted string containing the created work item details including
@@ -364,6 +448,10 @@ def register_tools(mcp) -> None:
         """
         try:
             wit_client = get_work_item_client()
+            
+            # Process description if provided
+            if description:
+                description = sanitize_description_html(description)
             
             # Start with standard fields
             all_fields = _prepare_standard_fields(
@@ -385,7 +473,9 @@ def register_tools(mcp) -> None:
                 project=project,
                 work_item_type=work_item_type,
                 wit_client=wit_client,
-                parent_id=parent_id
+                parent_id=parent_id,
+                acceptance_criteria=acceptance_criteria,
+                related_ids=related_ids
             )
             
         except AzureDevOpsClientError as e:
@@ -408,6 +498,9 @@ def register_tools(mcp) -> None:
         story_points: Optional[float] = None,
         priority: Optional[int] = None,
         tags: Optional[str] = None,
+        acceptance_criteria: Optional[str] = None,
+        related_ids: Optional[list[int]] = None,
+        remove_related_ids: Optional[list[int]] = None
     ) -> str:
         """
         Modifies an existing work item's fields and properties.
@@ -438,6 +531,7 @@ def register_tools(mcp) -> None:
             story_points: Optional new story points value
             priority: Optional new priority value
             tags: Optional new tags as comma-separated string
+            acceptance_criteria: Optional acceptance criteria (will be converted to HTML)
             
         Returns:
             Formatted string containing the updated work item details with
@@ -445,6 +539,10 @@ def register_tools(mcp) -> None:
         """
         try:
             wit_client = get_work_item_client()
+            
+            # Process description if provided
+            if description:
+                description = sanitize_description_html(description)
             
             # Start with standard fields
             all_fields = _prepare_standard_fields(
@@ -458,14 +556,18 @@ def register_tools(mcp) -> None:
                     field_name = _ensure_system_prefix(field_name)
                     all_fields[field_name] = field_value
                 
-            if not all_fields:
-                return "Error: At least one field must be specified for update"
+            # Allow updates with only related_ids or remove_related_ids
+            if not all_fields and not acceptance_criteria and not related_ids and not remove_related_ids:
+                return "Error: At least one field or relationship must be specified for update"
             
             return _update_work_item_impl(
                 id=id,
                 fields=all_fields,
                 wit_client=wit_client,
-                project=project
+                project=project,
+                acceptance_criteria=acceptance_criteria,
+                related_ids=related_ids,
+                remove_related_ids=remove_related_ids
             )
             
         except AzureDevOpsClientError as e:

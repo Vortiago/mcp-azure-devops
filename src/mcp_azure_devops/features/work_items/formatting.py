@@ -89,12 +89,13 @@ def _format_build_info(fields: dict) -> list[str]:
     return build_info
 
 
-def format_work_item(work_item: WorkItem) -> str:
+def format_work_item(work_item: WorkItem, detailed: bool = True) -> str:
     """
     Format work item information for display.
     
     Args:
         work_item: Work item object to format
+        detailed: Whether to return detailed information
         
     Returns:
         String with formatted work item details
@@ -102,14 +103,32 @@ def format_work_item(work_item: WorkItem) -> str:
     fields = work_item.fields or {}
     details = [f"# Work Item {work_item.id}"]
     
-    # List all fields alphabetically for consistent output
-    for field_name in sorted(fields.keys()):
-        field_value = fields[field_name]
-        formatted_value = _format_field_value(field_value)
-        details.append(f"- **{field_name}**: {formatted_value}")
+    # Add title if available
+    if "System.Title" in fields:
+        details[0] += f": {fields['System.Title']}"
     
-    # Add related items if available
-    if hasattr(work_item, 'relations') and work_item.relations:
+    if detailed:
+        # List all fields alphabetically for consistent output
+        for field_name in sorted(fields.keys()):
+            field_value = fields[field_name]
+            formatted_value = _format_field_value(field_value)
+            details.append(f"- **{field_name}**: {formatted_value}")
+    else:
+        # Basic information only
+        important_fields = [
+            "System.WorkItemType", 
+            "System.State", 
+            "System.AssignedTo", 
+            "System.CreatedDate", 
+            "System.ChangedDate"
+        ]
+        for field_name in important_fields:
+            if field_name in fields:
+                field_value = fields[field_name]
+                formatted_value = _format_field_value(field_value)
+                details.append(f"- **{field_name}**: {formatted_value}")
+      # Add related items if available (only in detailed mode)
+    if detailed and hasattr(work_item, 'relations') and work_item.relations:
         details.append("\n## Related Items")
         for link in work_item.relations:
             details.append(f"- {link.rel} URL: {link.url}")
