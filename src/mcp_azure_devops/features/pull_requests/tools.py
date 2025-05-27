@@ -208,8 +208,22 @@ def _add_comment_impl(
             content=content
         )
         
-        thread_id = result.get("id")
-        comment_id = result.get("comments", [{}])[0].get("id") if result.get("comments") else None
+        # Handle both dict and object types
+        if isinstance(result, dict):
+            thread_id = result.get("id")
+            comments = result.get("comments", [])
+        else:
+            thread_id = getattr(result, 'id', None)
+            comments = getattr(result, 'comments', [])
+        
+        # Get the first comment's ID
+        comment_id = None
+        if comments and len(comments) > 0:
+            first_comment = comments[0]
+            if isinstance(first_comment, dict):
+                comment_id = first_comment.get("id")
+            else:
+                comment_id = getattr(first_comment, 'id', None)
         
         return f"Comment added successfully:\nThread ID: {thread_id}\nComment ID: {comment_id}\nContent: {content}"
     except Exception as e:

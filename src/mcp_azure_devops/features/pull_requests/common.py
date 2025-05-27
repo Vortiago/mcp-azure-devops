@@ -363,7 +363,7 @@ class AzureDevOpsClient:
             AzureDevOpsClientError: If request fails
         """
         try:
-            work_items = self.git_client.get_pull_request_work_items(
+            work_items = self.git_client.get_pull_request_work_item_refs(
                 repository_id=self.repo,
                 pull_request_id=pull_request_id,
                 project=self.project
@@ -476,10 +476,20 @@ class AzureDevOpsClient:
             AzureDevOpsClientError: If request fails
         """
         try:
-            changes = self.git_client.get_pull_request_iterations_changes(
+            iterations = self.git_client.get_pull_request_iterations(
                 repository_id=self.repo,
                 pull_request_id=pull_request_id,
                 project=self.project
+            )
+            
+            latest_iteration = max(iterations, key=lambda i: i.id)
+            
+            changes = self.git_client.get_pull_request_iteration_changes(
+                repository_id=self.repo,
+                pull_request_id=pull_request_id,
+                project=self.project,
+                compare_to=0,  # Compare to base commit, we might want to allow specifying this in the future.
+                iteration_id=latest_iteration.id  # We might want to allow specifying iterations in the future.
             )
             
             return changes.__dict__
