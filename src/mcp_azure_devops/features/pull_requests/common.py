@@ -11,8 +11,10 @@ from azure.devops.v7_1.git.models import (
     GitPullRequestSearchCriteria,
     Comment,    
     GitPullRequestCommentThread,
-    IdentityRefWithVote
+    IdentityRefWithVote,
+    ResourceRef
 )
+from azure.devops.v7_1.work_item_tracking.models import JsonPatchOperation
 
 from mcp_azure_devops.utils.azure_client import get_connection
 
@@ -46,6 +48,32 @@ def get_pull_request_client():
         raise AzureDevOpsClientError("Failed to get git client.")
     
     return git_client
+
+def get_work_item_client():
+    """
+    Get the work item client for Azure DevOps.
+    
+    Returns:
+        Work Item Tracking client instance
+    
+    Raises:
+        AzureDevOpsClientError: If connection or client creation fails
+    """
+    # Get connection to Azure DevOps
+    connection = get_connection()
+    
+    if not connection:
+        raise AzureDevOpsClientError(
+            "Azure DevOps PAT or organization URL not found in environment variables."
+        )
+    
+    # Get the work item tracking client
+    work_item_client = connection.clients.get_work_item_tracking_client()
+    
+    if work_item_client is None:
+        raise AzureDevOpsClientError("Failed to get work item tracking client.")
+    
+    return work_item_client
 
 
 class AzureDevOpsClient:
@@ -373,7 +401,7 @@ class AzureDevOpsClient:
         except Exception as e:
             raise AzureDevOpsClientError(f"Failed to get pull request work items: {str(e)}")
         
-    def add_work_items_to_pull_request(self, pull_request_id: int, work_item_ids: List[int]) -> bool:
+    def add_work_items_to_pull_request(self, pull_request_id: int, work_item_ids: List[int]) -> Dict[str, Any]:
         """
         Link work items to a Pull Request.
         
@@ -382,21 +410,51 @@ class AzureDevOpsClient:
             work_item_ids: List of work item IDs to link
             
         Returns:
-            True if successful
+            Updated PR details
             
         Raises:
             AzureDevOpsClientError: If request fails
         """
         try:
+            # Get the PR to extract necessary IDs
+            pr = self.git_client.get_pull_request(
+                repository_id=self.repo,
+                project=self.project,
+                pull_request_id=pull_request_id
+            )
+            
+            # Extract project and repository IDs for artifact URL
+            project_id = pr.repository.project.id
+            repo_id = pr.repository.id
+            
+            # Create the artifact URL for the pull request
+            artifact_url = f"vstfs:///Git/PullRequestId/{project_id}%2F{repo_id}%2F{pull_request_id}"
+            
+            # Get work item tracking client
+            wit_client = get_work_item_client()
+            
+            # Update each work item to add the artifact link
             for work_item_id in work_item_ids:
-                self.git_client.create_pull_request_work_item_refs(
-                    repository_id=self.repo,
-                    pull_request_id=pull_request_id,
-                    project=self.project,
-                    work_item_ids=[work_item_id]
+                patch_doc = [
+                    JsonPatchOperation(
+                        op="add",
+                        path="/relations/-",
+                        value={
+                            "rel": "ArtifactLink",
+                            "url": artifact_url,
+                            "attributes": {"name": "Pull Request"}
+                        }
+                    )
+                ]
+                
+                wit_client.update_work_item(
+                    document=patch_doc,
+                    id=work_item_id,
+                    project=self.project
                 )
             
-            return True
+            return {"message": f"Successfully linked {len(work_item_ids)} work items to PR #{pull_request_id}"}
+    
         except Exception as e:
             raise AzureDevOpsClientError(f"Failed to link work items to pull request: {str(e)}")
         
