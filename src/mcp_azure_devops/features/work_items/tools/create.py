@@ -203,8 +203,8 @@ def _add_link_to_work_item_impl(
     return format_work_item(updated_work_item)
 
 
-def _prepare_create_fields(
-    title: str,
+def _prepare_standard_fields(
+    title: Optional[str] = None,
     description: Optional[str] = None,
     state: Optional[str] = None,
     assigned_to: Optional[str] = None,
@@ -215,7 +215,8 @@ def _prepare_create_fields(
     tags: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Prepare fields dictionary for work item creation.
+    Prepare fields dictionary with standard fields for work item 
+    creation/update.
     
     Args:
         title: The title of the work item
@@ -231,9 +232,10 @@ def _prepare_create_fields(
     Returns:
         Dictionary of field name/value pairs
     """
-    fields = {
-        "System.Title": title
-    }
+    fields = {}
+    
+    if title:
+        fields["System.Title"] = title
     
     if description:
         fields["System.Description"] = description
@@ -263,6 +265,44 @@ def _prepare_create_fields(
     return fields
 
 
+def _ensure_system_prefix(field_name: str) -> str:
+    """
+    Ensure field names have appropriate prefix.
+    
+    Args:
+        field_name: The field name to format
+        
+    Returns:
+        Formatted field name with prefix if needed
+    """
+    if field_name.startswith("System.") or field_name.startswith("Microsoft."):
+        return field_name
+    
+    # Check for commonly used short names
+    common_fields = {
+        "title": "System.Title",
+        "description": "System.Description",
+        "state": "System.State",
+        "assignedto": "System.AssignedTo",
+        "assigned": "System.AssignedTo",
+        "iterationpath": "System.IterationPath",
+        "iteration": "System.IterationPath",
+        "areapath": "System.AreaPath",
+        "area": "System.AreaPath",
+        "tags": "System.Tags",
+        "storypoints": "Microsoft.VSTS.Scheduling.StoryPoints",
+        "priority": "Microsoft.VSTS.Common.Priority"
+    }
+    
+    # Try to match common field names (case-insensitive)
+    normalized = field_name.lower().replace("_", "").replace(" ", "")
+    if normalized in common_fields:
+        return common_fields[normalized]
+    
+    # If not recognized, assume it's a custom field
+    return field_name
+
+
 def register_tools(mcp) -> None:
     """
     Register work item creation tools with the MCP server.
@@ -276,6 +316,7 @@ def register_tools(mcp) -> None:
         title: str,
         project: str,
         work_item_type: str,
+        fields: Optional[Dict[str, Any]] = None,
         description: Optional[str] = None,
         state: Optional[str] = None,
         assigned_to: Optional[str] = None,
@@ -304,6 +345,8 @@ def register_tools(mcp) -> None:
             project: The project name or ID where the work item will be created
             work_item_type: Type of work item (e.g., "User Story", "Bug", 
                 "Task")
+            fields: Optional dictionary of additional field name/value pairs 
+                to set
             description: Optional description of the work item
             state: Optional initial state for the work item
             assigned_to: Optional user email to assign the work item to
@@ -321,13 +364,24 @@ def register_tools(mcp) -> None:
         """
         try:
             wit_client = get_work_item_client()
-            fields = _prepare_create_fields(
+            
+            # Start with standard fields
+            all_fields = _prepare_standard_fields(
                 title, description, state, assigned_to,
                 iteration_path, area_path, story_points, priority, tags
             )
             
+            # Add custom fields if provided
+            if fields:
+                for field_name, field_value in fields.items():
+                    field_name = _ensure_system_prefix(field_name)
+                    all_fields[field_name] = field_value
+            
+            if not all_fields.get("System.Title"):
+                return "Error: Title is required for work item creation"
+            
             return _create_work_item_impl(
-                fields=fields,
+                fields=all_fields,
                 project=project,
                 work_item_type=work_item_type,
                 wit_client=wit_client,
@@ -343,6 +397,7 @@ def register_tools(mcp) -> None:
     @mcp.tool()
     def update_work_item(
         id: int,
+        fields: Optional[Dict[str, Any]] = None,
         project: Optional[str] = None,
         title: Optional[str] = None,
         description: Optional[str] = None,
@@ -363,6 +418,7 @@ def register_tools(mcp) -> None:
         - Update the description or details of a requirement
         - Modify effort estimates or priority levels
         - Add or change classification (area/iteration)
+        - Update any field supported by the work item type
         
         IMPORTANT: This tool updates the work item directly in Azure DevOps.
         Changes will be immediately visible to all users with access to the
@@ -371,6 +427,7 @@ def register_tools(mcp) -> None:
         
         Args:
             id: The ID of the work item to update
+            fields: Optional dictionary of field name/value pairs to update
             project: Optional project name or ID
             title: Optional new title for the work item
             description: Optional new description
@@ -388,21 +445,25 @@ def register_tools(mcp) -> None:
         """
         try:
             wit_client = get_work_item_client()
-            fields = _prepare_create_fields(
-                title if title else "", description, state, assigned_to,
+            
+            # Start with standard fields
+            all_fields = _prepare_standard_fields(
+                title, description, state, assigned_to,
                 iteration_path, area_path, story_points, priority, tags
             )
             
-            # Remove empty title if it was not provided
-            if not title:
-                fields.pop("System.Title", None)
+            # Add custom fields if provided
+            if fields:
+                for field_name, field_value in fields.items():
+                    field_name = _ensure_system_prefix(field_name)
+                    all_fields[field_name] = field_value
                 
-            if not fields:
+            if not all_fields:
                 return "Error: At least one field must be specified for update"
             
             return _update_work_item_impl(
                 id=id,
-                fields=fields,
+                fields=all_fields,
                 wit_client=wit_client,
                 project=project
             )

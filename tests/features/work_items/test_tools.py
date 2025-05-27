@@ -60,13 +60,16 @@ def test_query_work_items_impl_with_results():
     
     result = _query_work_items_impl("SELECT * FROM WorkItems", 10, mock_client)
     
-    # Check that the result contains the expected basic info formatting
-    assert "# Work Item 123: Test Bug" in result
-    assert "Type: Bug" in result
-    assert "State: Active" in result
-    assert "# Work Item 456: Test Task" in result
-    assert "Type: Task" in result
-    assert "State: Closed" in result
+    # Check that the result contains the expected formatting 
+    # per format_work_item
+    assert "# Work Item 123" in result
+    assert "- **System.WorkItemType**: Bug" in result
+    assert "- **System.Title**: Test Bug" in result
+    assert "- **System.State**: Active" in result
+    assert "# Work Item 456" in result
+    assert "- **System.WorkItemType**: Task" in result
+    assert "- **System.Title**: Test Task" in result
+    assert "- **System.State**: Closed" in result
 
 
 # Tests for _get_work_item_impl
@@ -88,10 +91,11 @@ def test_get_work_item_impl_basic():
     result = _get_work_item_impl(123, mock_client)
     
     # Check that the result contains expected basic info
-    assert "# Work Item 123: Test Bug" in result
-    assert "Type: Bug" in result
-    assert "State: Active" in result
-    assert "Project: Test Project" in result
+    assert "# Work Item 123" in result
+    assert "- **System.WorkItemType**: Bug" in result
+    assert "- **System.Title**: Test Bug" in result
+    assert "- **System.State**: Active" in result
+    assert "- **System.TeamProject**: Test Project" in result
 
 def test_get_work_item_impl_detailed():
     """Test retrieving detailed work item info."""
@@ -121,13 +125,14 @@ def test_get_work_item_impl_detailed():
     result = _get_work_item_impl(123, mock_client)
     
     # Check that the result contains both basic and detailed info
-    assert "# Work Item 123: Test Bug" in result
-    assert "Type: Bug" in result
-    assert "Description" in result
-    assert "This is a description" in result
-    assert "Assigned To: Test User (test@example.com)" in result
-    assert "Created By: Creator User" in result
-    assert "Iteration: Project\\Sprint 1" in result
+    assert "# Work Item 123" in result
+    assert "- **System.WorkItemType**: Bug" in result
+    assert "- **System.Description**: This is a description" in result
+    assert "- **System.AssignedTo**: Test User (test@example.com)" in result
+    assert "- **System.CreatedBy**: Creator User" in result
+    assert "- **System.IterationPath**: Project\\Sprint 1" in result
+    assert "- **System.AreaPath**: Project\\Area" in result
+    assert "- **System.Tags**: tag1; tag2" in result
 
 def test_get_work_item_impl_error():
     """Test error handling in get_work_item_impl."""
