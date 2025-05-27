@@ -14,7 +14,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
     "azure-devops>=7.1.0b4",
-    "mcp>=0.1.0",
+    "mcp>=1.9.1",
 ]
 
 [project.scripts]
@@ -26,12 +26,12 @@ mcp-azure-devops = "mcp_azure_devops.server:main"
 
 [project.optional-dependencies]
 dev = [
-    "mcp[cli]>=0.1.0",
+    "mcp[cli]>=1.9.1",
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "ruff>=0.0.267",
     "anyio>=3.6.2",
-    "pyright>=1.1.350",
+    "pyright>=1.1.401",
 ]
 
 [tool.setuptools]
