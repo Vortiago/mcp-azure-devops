@@ -32,6 +32,7 @@ dev = [
     "ruff>=0.0.267",
     "anyio>=3.6.2",
     "pyright>=1.1.401",
+    "trio>=0.22.0",
 ]
 
 [tool.setuptools]
