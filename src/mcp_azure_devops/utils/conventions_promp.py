@@ -3,7 +3,7 @@ from mcp.server.fastmcp import FastMCP
 
 def register_prompt(mcp: FastMCP) -> None:
     
-    @mcp.prompt(name="Create Conventions File", 
+    @mcp.prompt(name="create_conventions_file", 
                 description="Create a starting conventions file Azure DevOps")
     def create_conventions_file() -> str:
         """
