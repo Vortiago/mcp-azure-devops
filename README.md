@@ -130,3 +130,80 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
 - Uses [Azure DevOps Python API](https://github.com/microsoft/azure-devops-python-api)
+
+## Server Configuration
+
+The MCP Azure DevOps server supports extensive configuration through environment variables and command-line arguments.
+
+### Environment Variables
+
+The server supports configuration through environment variables with the `FASTMCP_` prefix. All FastMCP settings can be configured via environment variables.
+
+#### Core Server Settings
+- `FASTMCP_DEBUG`: Enable debug mode (default: False)
+- `FASTMCP_LOG_LEVEL`: Set log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- `FASTMCP_HOST`: Server host (default: 127.0.0.1)
+- `FASTMCP_PORT`: Server port (default: 8000)
+
+#### HTTP Transport Settings
+- `FASTMCP_MOUNT_PATH`: Mount path for the server (default: /)
+- `FASTMCP_SSE_PATH`: Server-Sent Events path (default: /sse)
+- `FASTMCP_MESSAGE_PATH`: Message path (default: /messages/)
+- `FASTMCP_STREAMABLE_HTTP_PATH`: Streamable HTTP path (default: /mcp)
+
+#### StreamableHTTP Settings
+- `FASTMCP_JSON_RESPONSE`: Enable JSON responses (default: False)
+- `FASTMCP_STATELESS_HTTP`: Enable stateless HTTP mode (default: False)
+
+#### Azure DevOps Settings
+- `AZURE_DEVOPS_PAT`: Personal Access Token for Azure DevOps authentication (**Required**)
+- `AZURE_DEVOPS_ORGANIZATION_URL`: Azure DevOps organization URL (e.g., https://dev.azure.com/myorg) (**Required**)
+
+### Command-Line Usage
+
+#### Basic Usage
+```bash
+# Basic usage with default settings
+python -m mcp_azure_devops
+
+# Use specific transport
+python -m mcp_azure_devops --transport stdio
+python -m mcp_azure_devops --transport sse
+python -m mcp_azure_devops --transport streamable-http
+
+# Custom host and port
+python -m mcp_azure_devops --host 0.0.0.0 --port 9000
+
+# Enable stateless HTTP mode
+python -m mcp_azure_devops --stateless-http
+```
+
+#### Using Environment Variables
+```bash
+export FASTMCP_HOST=0.0.0.0
+export FASTMCP_PORT=9000
+export FASTMCP_DEBUG=true
+export FASTMCP_STATELESS_HTTP=true
+export AZURE_DEVOPS_PAT=your_pat_token
+export AZURE_DEVOPS_ORGANIZATION_URL=https://dev.azure.com/yourorg
+python -m mcp_azure_devops
+```
+
+### Transport Types
+
+The server supports three transport types:
+
+- **stdio**: Standard input/output transport for direct communication
+- **sse**: Server-Sent Events transport for web-based clients
+- **streamable-http**: HTTP-based transport with streaming capabilities (default)
+
+### Required Environment Variables
+
+These environment variables are required for the server to function:
+
+- `AZURE_DEVOPS_PAT`: Personal Access Token for Azure DevOps API access
+- `AZURE_DEVOPS_ORGANIZATION_URL`: Your Azure DevOps organization URL
+
+### Optional Environment Variables
+
+All `FASTMCP_*` prefixed variables are optional and have sensible defaults. You can override any of the core server settings, HTTP transport settings, or StreamableHTTP settings as needed.
