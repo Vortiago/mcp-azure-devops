@@ -5,4 +5,4 @@ source .venv/bin/activate
 
 export $(grep -v '^#' .env | xargs)
 
-python src/mcp_azure_devops/server.py
+python src/mcp_azure_devops/server.py --transport streamable-http
