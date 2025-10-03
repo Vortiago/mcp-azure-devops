@@ -3,7 +3,7 @@ Comment operations for Azure DevOps work items.
 
 This module provides MCP tools for retrieving and adding work item comments.
 """
-from typing import Optional
+from typing import Optional, Union
 
 from azure.devops.v7_1.work_item_tracking import WorkItemTrackingClient
 from azure.devops.v7_1.work_item_tracking.models import CommentCreate
@@ -12,6 +12,7 @@ from mcp_azure_devops.features.work_items.common import (
     AzureDevOpsClientError,
     get_work_item_client,
 )
+from mcp_azure_devops.features.work_items.tools.utils import sanitize_description_html
 
 
 def _format_comment(comment) -> str:
@@ -52,7 +53,9 @@ def _get_project_for_work_item(
     Get the project name for a work item.
     
     Args:
-        item_id: The work item ID
+        item_id: The work item ID (integer). Example: 502199
+                This should be a positive integer representing the unique
+                identifier of the work item in Azure DevOps.
         wit_client: Work item tracking client
             
     Returns:
@@ -77,7 +80,9 @@ def _get_work_item_comments_impl(
     Implementation of work item comments retrieval.
     
     Args:
-        item_id: The work item ID
+        item_id: The work item ID (integer). Example: 502199
+                This should be a positive integer representing the unique
+                identifier of the work item in Azure DevOps.
         wit_client: Work item tracking client
         project: Optional project name
             
@@ -115,7 +120,9 @@ def _add_work_item_comment_impl(
     Implementation of work item comment addition.
     
     Args:
-        item_id: The work item ID
+        item_id: The work item ID (integer). Example: 502199
+                This should be a positive integer representing the unique
+                identifier of the work item in Azure DevOps.
         text: Comment text to add
         wit_client: Work item tracking client
         project: Optional project name
@@ -130,8 +137,11 @@ def _add_work_item_comment_impl(
         if not project:
             return f"Error retrieving work item {item_id} to determine project"
     
+    # Process comment content for HTML conversion
+    text_html = sanitize_description_html(text)
+    
     # Create comment request
-    comment_request = CommentCreate(text=text)
+    comment_request = CommentCreate(text=text_html)
     
     # Add the comment
     new_comment = wit_client.add_comment(
@@ -166,7 +176,9 @@ def register_tools(mcp) -> None:
         - Understand the context and evolution of a work item
         
         Args:
-            id: The work item ID
+            id: The work item ID (integer). Example: 502199
+                This should be a positive integer representing the unique
+                identifier of the work item in Azure DevOps.
             project: Optional project name. If not provided, will be 
                 determined from the work item.
             
@@ -203,8 +215,10 @@ def register_tools(mcp) -> None:
         Access Token used for authentication.
         
         Args:
-            id: The work item ID
-            text: The text of the comment (supports markdown formatting)
+            id: The work item ID (integer). Example: 502199
+                This should be a positive integer representing the unique
+                identifier of the work item in Azure DevOps.
+            text: The text of the comment. You must provide the content in HTML format. The automatic conversion to HTML is very basic (only line breaks are preserved as <br>), so for best results, please provide well-formed HTML content directly. Markdown is not fully supported.
             project: Optional project name. If not provided, will be 
                 determined from the work item.
             

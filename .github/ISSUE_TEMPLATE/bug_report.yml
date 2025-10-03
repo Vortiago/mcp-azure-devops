@@ -1,0 +1,91 @@
+name: 🐛 Bug Report (錯誤回報)
+description: 回報程式碼錯誤或非預期的行為
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感謝您回報錯誤！請填寫以下資訊以幫助我們快速定位和修復問題。
+
+  - type: input
+    id: summary
+    attributes:
+      label: 問題描述
+      description: 請簡潔地描述遇到的問題
+      placeholder: 例如：當執行 create_work_item 功能時，系統拋出 KeyError 異常
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: 重現步驟
+      description: 請詳細描述如何重現這個問題
+      placeholder: |
+        1. 設定環境變數...
+        2. 執行命令...
+        3. 點擊按鈕...
+        4. 看到錯誤...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: 預期行為
+      description: 您期望發生什麼？
+      placeholder: 描述正常情況下應該發生的行為
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: 實際行為
+      description: 實際上發生了什麼？
+      placeholder: 描述實際觀察到的錯誤行為
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境資訊
+      description: 請提供您的環境設定資訊
+      placeholder: |
+        - OS: Windows 11
+        - Python 版本: 3.11
+        - Azure DevOps Server 版本: 
+        - MCP Azure DevOps 版本: 
+      render: markdown
+
+  - type: textarea
+    id: error_logs
+    attributes:
+      label: 錯誤日誌
+      description: 如有錯誤訊息或日誌，請貼在此處
+      placeholder: 請貼上完整的錯誤訊息或堆疊追蹤
+      render: shell
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 補充資訊
+      description: 任何其他可能有用的資訊
+      placeholder: 例如：截圖、相關設定檔案、特殊環境條件等
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 檢查清單
+      description: 請確認以下項目
+      options:
+        - label: 我已經搜尋過現有的 issues，確認這是新問題
+          required: true
+        - label: 我已經提供了足夠的資訊來重現此問題
+          required: true
+        - label: 我已經測試過最新版本，問題依然存在
+          required: false

@@ -62,6 +62,11 @@ Create a `.env` file in the project root with the following variables:
 AZURE_DEVOPS_PAT=your_personal_access_token
 AZURE_DEVOPS_ORGANIZATION_URL=https://your-organization.visualstudio.com or https://dev.azure.com/your-organisation
 ```
+or use cmd
+```
+echo AZURE_DEVOPS_PAT=your_personal_access_token> .env
+echo AZURE_DEVOPS_ORGANIZATION_URL=https://your-organization.visualstudio.com>> .env
+```
 
 Note: Make sure to provide the full URL to your Azure DevOps organization.
 

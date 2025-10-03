@@ -1,0 +1,108 @@
+name: ❓ Question (問題詢問)
+description: 詢問使用方式、技術支援或其他問題
+title: "[Question]: "
+labels: ["question", "help-wanted"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        歡迎提出問題！我們很樂意幫助您解決使用上的疑問。
+
+  - type: dropdown
+    id: question_type
+    attributes:
+      label: 問題類型
+      description: 您的問題屬於哪個類別？
+      options:
+        - 如何使用 (How-to)
+        - 設定問題
+        - API 使用方式
+        - 最佳實踐
+        - 疑難排解
+        - 架構或設計問題
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: question_description
+    attributes:
+      label: 問題描述
+      description: 請詳細描述您的問題
+      placeholder: |
+        請清楚描述您想要了解或解決的問題，包括：
+        - 您想要達成什麼目標？
+        - 目前遇到什麼困難？
+        - 您已經嘗試過什麼方法？
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 使用情境
+      description: 請提供相關的使用情境和背景
+      placeholder: |
+        例如：
+        - 專案類型和規模
+        - 使用的 Azure DevOps 版本
+        - 團隊大小和工作流程
+        - 特殊需求或限制
+
+  - type: textarea
+    id: current_setup
+    attributes:
+      label: 目前設定
+      description: 請描述您目前的設定和環境
+      placeholder: |
+        例如：
+        - MCP Azure DevOps 版本
+        - Python 版本
+        - Azure DevOPS 組織設定
+        - 相關的設定檔內容
+      render: markdown
+
+  - type: textarea
+    id: attempted_solutions
+    attributes:
+      label: 已嘗試的解決方案
+      description: 您已經嘗試過哪些方法？
+      placeholder: |
+        請列出您已經嘗試過的方法：
+        - 查看過的文件
+        - 嘗試過的設定
+        - 搜尋到的相關資訊
+
+  - type: textarea
+    id: expected_outcome
+    attributes:
+      label: 期望結果
+      description: 您希望得到什麼樣的結果或解答？
+      placeholder: 描述您期望的解決方案或想要學到的內容
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: 補充資訊
+      description: 任何其他可能有用的資訊
+      placeholder: |
+        例如：
+        - 相關的錯誤訊息
+        - 螢幕截圖
+        - 日誌檔案
+        - 參考連結
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 檢查清單
+      description: 請確認以下項目
+      options:
+        - label: 我已經搜尋過現有的 issues 和文件
+          required: true
+        - label: 我已經提供了足夠的背景資訊和情境
+          required: true
+        - label: 我的問題描述清楚且具體
+          required: true

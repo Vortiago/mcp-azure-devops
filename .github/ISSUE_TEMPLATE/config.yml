@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 討論區 (Discussions)
+    url: https://github.com/a1083420002/mcp-azure-devops/discussions
+    about: 一般討論、想法分享和社群交流
+  - name: 📖 官方文件
+    url: https://github.com/a1083420002/mcp-azure-devops/blob/main/README.md
+    about: 查看完整的安裝和使用指南
+  - name: 🐛 安全問題回報
+    url: https://github.com/a1083420002/mcp-azure-devops/security/advisories/new
+    about: 回報安全漏洞（請使用私密回報方式）

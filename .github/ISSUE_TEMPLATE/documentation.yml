@@ -1,0 +1,116 @@
+name: 📚 Documentation (文件改善)
+description: 建議文件改善、修正或新增
+title: "[Docs]: "
+labels: ["documentation", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感謝您幫助改善文件！請告訴我們您希望如何改善文件內容。
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: 文件類型
+      description: 這個請求涉及哪種類型的文件？
+      options:
+        - README.md
+        - API 文件
+        - 安裝指南
+        - 使用教學
+        - 開發者指南
+        - 程式碼註解
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: doc_location
+    attributes:
+      label: 文件位置
+      description: 請指出相關文件的位置或檔案名稱
+      placeholder: 例如：README.md、docs/api.md、src/server.py 第 123 行
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: 問題類型
+      description: 您希望進行什麼類型的文件改善？
+      options:
+        - 修正錯誤資訊
+        - 新增遺漏內容
+        - 改善可讀性
+        - 更新過時資訊
+        - 新增範例或指南
+        - 改善格式或排版
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_content
+    attributes:
+      label: 目前內容
+      description: 如果是修正或更新，請貼上目前的文件內容
+      placeholder: 請貼上需要修改的現有文件內容
+      render: markdown
+
+  - type: textarea
+    id: suggested_content
+    attributes:
+      label: 建議內容
+      description: 請提供您建議的文件內容
+      placeholder: 提供您建議的新內容或修正後的內容
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: reasoning
+    attributes:
+      label: 改善理由
+      description: 請說明為什麼需要這個改善
+      placeholder: |
+        例如：
+        - 目前的說明不夠清楚，新手容易搞混
+        - 範例程式碼有錯誤，無法正常執行
+        - 缺少重要的設定步驟
+    validations:
+      required: true
+
+  - type: textarea
+    id: target_audience
+    attributes:
+      label: 目標讀者
+      description: 這個文件改善主要是為了幫助哪些使用者？
+      placeholder: |
+        例如：
+        - 新手開發者
+        - 有經驗的使用者
+        - 系統管理員
+        - API 使用者
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 補充資訊
+      description: 任何其他相關資訊
+      placeholder: |
+        例如：
+        - 相關的 GitHub Issues 或 Pull Requests
+        - 參考文件或資源
+        - 特定的使用場景
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 檢查清單
+      description: 請確認以下項目
+      options:
+        - label: 我已經檢查過相關文件的最新版本
+          required: true
+        - label: 我已經清楚說明了改善的理由和建議
+          required: true
+        - label: 建議的內容符合專案的文件風格和標準
+          required: false
