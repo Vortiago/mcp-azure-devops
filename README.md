@@ -1,5 +1,15 @@
 # MCP Azure DevOps Server
 
+> **⚠️ NOTICE: Official Server Available**
+> 
+> **Please use the official Microsoft Azure DevOps MCP server instead:**
+> 
+> **https://github.com/microsoft/azure-devops-mcp**
+> 
+> This repository is no longer maintained. The official Microsoft server provides better support, ongoing maintenance, and the latest features.
+
+---
+
 A Model Context Protocol (MCP) server enabling AI assistants to interact with Azure DevOps services.
 
 ## Overview
